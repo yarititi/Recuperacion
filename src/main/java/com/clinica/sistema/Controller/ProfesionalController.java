@@ -1,8 +1,7 @@
 package com.clinica.sistema.Controller;
 
-import com.clinica.sistema.Entity.Cita;
-import com.clinica.sistema.Entity.Profesional;
-import com.clinica.sistema.Entity.Usuario;
+import com.clinica.sistema.Entity.CitaEntity;
+import com.clinica.sistema.Entity.ProfesionalEntity;
 import com.clinica.sistema.Service.CitaService;
 import com.clinica.sistema.Service.ProfesionalService;
 import com.clinica.sistema.Service.UsuarioService;
@@ -30,8 +29,8 @@ public class ProfesionalController {
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
         String email = authentication.getName();
-        Profesional profesional = profesionalService.findByUsuarioEmail(email).orElseThrow();
-        List<Cita> citas = citaService.findByProfesionalId(profesional.getId());
+        ProfesionalEntity profesional = profesionalService.findByUsuarioEmail(email).orElseThrow();
+        List<CitaEntity> citas = citaService.findByProfesionalId(profesional.getId());
         
         model.addAttribute("profesional", profesional);
         model.addAttribute("citas", citas);
@@ -40,7 +39,7 @@ public class ProfesionalController {
 
     @PostMapping("/citas/{id}/estado")
     public String actualizarEstadoCita(@PathVariable Long id, @RequestParam String estado) {
-        Cita cita = citaService.findById(id).orElseThrow();
+        CitaEntity cita = citaService.findById(id).orElseThrow();
         cita.setEstado(estado);
         citaService.save(cita);
         return "redirect:/profesional/dashboard?updated";

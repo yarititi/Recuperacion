@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Clínica Médica</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* CSS PARA DASHBOARD - ACTUALIZADO */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* NAVIGATION */
+        .navbar {
+            background: var(--dark);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0da271;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* DASHBOARD CONTENT */
+        .dashboard {
+            margin-top: 80px;
+            padding: 2rem 0;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .dashboard-card p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* USER INFO */
+        .user-info {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .user-info h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .user-detail {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .user-detail strong {
+            color: var(--dark);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .dashboard {
+                margin-top: 70px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar-nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-hospital"></i>
+                Clínica Médica
+            </a>
+            <ul class="navbar-nav">
+                <li><a class="nav-link" th:href="@{/user/citas}">
+                    <i class="fas fa-calendar-alt"></i> Mis Citas
+                </a></li>
+                <li><span class="nav-link" style="color: #60a5fa;">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${#authentication.name}">Usuario</span>
+                </span></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1>¡Bienvenido a tu Dashboard!</h1>
+                <p>Gestiona tus citas médicas de manera fácil y rápida</p>
+            </div>
+
+            <!-- User Information -->
+            <div class="user-info">
+                <h3><i class="fas fa-info-circle"></i> Tu Información</h3>
+                <div class="user-details">
+                    <div class="user-detail">
+                        <strong>Email:</strong> <span th:text="${#authentication.name}">usuario@ejemplo.com</span>
+                    </div>
+					<div class="user-detail">
+					    <strong>Rol:</strong> <span th:text="${rolUsuario}">USER</span>
+					</div>
+                    <div class="user-detail">
+                        <strong>Estado:</strong> <span style="color: var(--success);">Activo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <i class="fas fa-calendar-plus card-icon"></i>
+                    <h3>Agendar Cita</h3>
+                    <p>Reserva una nueva cita médica con nuestros especialistas</p>
+                    <a th:href="@{/user/citas/nueva}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Agendar Ahora
+                    </a>
+                </div>
+
+                <div class="dashboard-card">
+                    <i class="fas fa-list-alt card-icon"></i>
+                    <h3>Mis Citas</h3>
+                    <p>Revisa y gestiona todas tus citas programadas</p>
+                    <a th:href="@{/user/citas}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> Ver Citas
+                    </a>
+                </div>
+
+				<!-- ENLACE CORRECTO PARA PERFIL -->
+				<div class="dashboard-card">
+				    <i class="fas fa-user-edit card-icon"></i>
+				    <h3>Mi Perfil</h3>
+				    <p>Actualiza tu información personal y preferencias</p>
+				    <a th:href="@{/user/perfil/editar}" class="btn btn-primary">Editar Perfil</a>
+				</div>
+
+                <div class="dashboard-card">
+                    <i class="fas fa-history card-icon"></i>
+                    <h3>Historial</h3>
+                    <p>Consulta tu historial médico y citas anteriores</p>
+                    <a href="#" class="btn btn-primary">Ver Historial</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

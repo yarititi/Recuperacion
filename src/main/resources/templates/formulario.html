@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Cita - Clínica Médica</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Mantén tu CSS actual -->
+	<style>
+			/* CSS PARA FORMULARIO DE CITAS */
+			:root {
+				--primary: #2563eb;
+				--primary-dark: #1d4ed8;
+				--secondary: #7c3aed;
+				--success: #10b981;
+				--danger: #ef4444;
+				--warning: #f59e0b;
+				--light: #f8fafc;
+				--dark: #1e293b;
+				--text: #334155;
+				--text-light: #64748b;
+				--border: #e2e8f0;
+				--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				line-height: 1.6;
+				color: var(--text);
+				background: #ffffff;
+			}
+
+			.container {
+				width: 100%;
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 0 20px;
+			}
+
+			/* NAVIGATION */
+			.navbar {
+				background: var(--dark);
+				padding: 1rem 0;
+				position: fixed;
+				width: 100%;
+				top: 0;
+				z-index: 1000;
+				box-shadow: var(--shadow);
+			}
+
+			.navbar .container {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.navbar-brand {
+				color: white;
+				font-size: 1.5rem;
+				font-weight: bold;
+				text-decoration: none;
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
+
+			.navbar-nav {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				list-style: none;
+			}
+
+			.nav-link {
+				color: white;
+				text-decoration: none;
+				padding: 0.5rem 1rem;
+				border-radius: 6px;
+				transition: background 0.3s ease;
+			}
+
+			.nav-link:hover {
+				background: rgba(255, 255, 255, 0.1);
+			}
+
+			.btn {
+				display: inline-block;
+				padding: 0.75rem 1.5rem;
+				border: none;
+				border-radius: 8px;
+				text-decoration: none;
+				font-weight: 600;
+				text-align: center;
+				cursor: pointer;
+				transition: all 0.3s ease;
+			}
+
+			.btn-primary {
+				background: var(--primary);
+				color: white;
+			}
+
+			.btn-primary:hover {
+				background: var(--primary-dark);
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+			}
+
+			.btn-success {
+				background: var(--success);
+				color: white;
+			}
+
+			.btn-success:hover {
+				background: #0da271;
+				transform: translateY(-2px);
+			}
+
+			.btn-secondary {
+				background: var(--text-light);
+				color: white;
+			}
+
+			.btn-secondary:hover {
+				background: #475569;
+				transform: translateY(-2px);
+			}
+
+			/* MAIN CONTENT */
+			.form-container {
+				margin-top: 80px;
+				padding: 2rem 0;
+			}
+
+			.page-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 2rem;
+				padding-bottom: 1rem;
+				border-bottom: 2px solid var(--border);
+			}
+
+			.page-title {
+				font-size: 2rem;
+				font-weight: 800;
+				color: var(--dark);
+			}
+
+			.page-subtitle {
+				color: var(--text-light);
+				margin-top: 0.5rem;
+			}
+
+			/* FORM STYLES */
+			.form-card {
+				background: white;
+				border-radius: 15px;
+				box-shadow: var(--shadow);
+				padding: 2rem;
+				margin-bottom: 2rem;
+			}
+
+			.form-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5rem;
+			}
+
+			.form-group {
+				margin-bottom: 1.5rem;
+			}
+
+			.form-group-full {
+				grid-column: 1 / -1;
+				margin-bottom: 1.5rem;
+			}
+
+			.form-label {
+				display: block;
+				font-weight: 600;
+				color: var(--dark);
+				margin-bottom: 0.5rem;
+				font-size: 0.95rem;
+			}
+
+			.form-control {
+				width: 100%;
+				padding: 12px 14px;
+				border: 2px solid var(--border);
+				border-radius: 8px;
+				font-size: 1rem;
+				transition: all 0.3s ease;
+				background: white;
+				font-family: inherit;
+			}
+
+			.form-control:focus {
+				outline: none;
+				border-color: var(--primary);
+				box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+			}
+
+			.form-text {
+				display: block;
+				font-size: 0.875rem;
+				color: var(--text-light);
+				margin-top: 0.25rem;
+			}
+
+			.form-actions {
+				grid-column: 1 / -1;
+				display: flex;
+				gap: 1rem;
+				justify-content: flex-end;
+				margin-top: 1rem;
+				padding-top: 1.5rem;
+				border-top: 1px solid var(--border);
+			}
+
+			/* SERVICE CARD PREVIEW */
+			.service-preview {
+				background: var(--light);
+				padding: 1.5rem;
+				border-radius: 10px;
+				border-left: 4px solid var(--primary);
+				margin-top: 1rem;
+			}
+
+			.service-preview h4 {
+				color: var(--primary);
+				margin-bottom: 0.5rem;
+			}
+
+			.service-price {
+				font-size: 1.25rem;
+				font-weight: 700;
+				color: var(--success);
+			}
+
+			/* ALERTS */
+			.alert {
+				padding: 1rem 1.25rem;
+				border-radius: 10px;
+				margin-bottom: 1.5rem;
+				font-weight: 500;
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				border-left: 4px solid transparent;
+			}
+
+			.alert-success {
+				background: #f0fdf4;
+				color: #16a34a;
+				border-left-color: #16a34a;
+			}
+
+			.alert-danger {
+				background: #fef2f2;
+				color: #dc2626;
+				border-left-color: #dc2626;
+			}
+
+			/* RESPONSIVE */
+			@media (max-width: 768px) {
+				.form-container {
+					margin-top: 70px;
+				}
+
+				.page-header {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 1rem;
+				}
+
+				.form-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.form-group-full {
+					grid-column: 1;
+				}
+
+				.form-actions {
+					flex-direction: column;
+				}
+
+				.navbar-nav {
+					flex-direction: column;
+					gap: 0.5rem;
+				}
+			}
+
+			@media (max-width: 480px) {
+				.page-title {
+					font-size: 1.5rem;
+				}
+
+				.form-card {
+					padding: 1.5rem;
+				}
+
+				.container {
+					padding: 0 15px;
+				}
+			}
+		</style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-hospital"></i>
+                Clínica Médica
+            </a>
+            <ul class="navbar-nav">
+                <li><a class="nav-link" th:href="@{/dashboard}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a></li>
+                <li><a class="nav-link" th:href="@{/user/citas}">
+                    <i class="fas fa-calendar-alt"></i> Mis Citas
+                </a></li>
+                <li><span class="nav-link" style="color: #60a5fa;">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${usuario.nombre}">Usuario</span>
+                </span></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="form-container">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span th:if="${cita.id == null}">Agendar Nueva Cita</span>
+                        <span th:if="${cita.id != null}">Editar Cita</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        <span th:if="${cita.id == null}">Programa una nueva cita médica con nuestros especialistas</span>
+                        <span th:if="${cita.id != null}">Modifica los datos de tu cita programada</span>
+                    </p>
+                </div>
+                <a th:href="@{/user/citas}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver a Mis Citas
+                </a>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Form Card -->
+            <div class="form-card">
+                <form th:action="@{/user/citas/guardar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:if="${cita.id != null}" name="id" th:value="${cita.id}" />
+                    
+                    <div class="form-grid">
+                        <!-- Servicio -->
+                        <div class="form-group">
+                            <label class="form-label">Servicio Médico *</label>
+                            <select class="form-control" name="servicio" required 
+                                    onchange="window.location.href = '/user/citas/nueva?servicioId=' + this.value">
+                                <option value="">Selecciona un servicio...</option>
+                                <option th:each="servicio : ${servicios}" 
+                                        th:value="${servicio.id}"
+                                        th:selected="${cita.servicio != null && cita.servicio.id == servicio.id}"
+                                        th:text="${servicio.nombre} + ' - $' + ${servicio.precio}">
+                                </option>
+                            </select>
+                            <small class="form-text">Elige el servicio médico que necesitas</small>
+                        </div>
+
+                        <!-- Profesional -->
+                        <div class="form-group">
+                            <label class="form-label">Profesional *</label>
+                            <select class="form-control" name="profesional" required>
+                                <option value="">Selecciona un profesional...</option>
+                                <option th:each="profesional : ${profesionales}" 
+                                        th:value="${profesional.id}"
+                                        th:selected="${cita.profesional != null && cita.profesional.id == profesional.id}"
+                                        th:text="${profesional.usuario.nombre} + ' - ' + ${profesional.especialidad}">
+                                </option>
+                            </select>
+                            <small class="form-text">Selecciona el médico o especialista</small>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="form-group">
+                            <label class="form-label">Fecha *</label>
+                            <input type="date" class="form-control" name="fecha" 
+                                   th:value="${cita.fechaHora != null ? #temporals.format(cita.fechaHora, 'yyyy-MM-dd') : ''}"
+                                   th:attr="min=${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
+                                   required>
+                            <small class="form-text">Selecciona la fecha para tu cita</small>
+                        </div>
+
+                        <!-- Hora -->
+                        <div class="form-group">
+                            <label class="form-label">Hora *</label>
+                            <select class="form-control" name="hora" required>
+                                <option value="">Selecciona una hora...</option>
+                                <option value="08:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '08:00'}">08:00 AM</option>
+                                <option value="09:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '09:00'}">09:00 AM</option>
+                                <option value="10:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '10:00'}">10:00 AM</option>
+                                <option value="11:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '11:00'}">11:00 AM</option>
+                                <option value="14:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '14:00'}">02:00 PM</option>
+                                <option value="15:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '15:00'}">03:00 PM</option>
+                                <option value="16:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '16:00'}">04:00 PM</option>
+                                <option value="17:00" th:selected="${cita.fechaHora != null && #temporals.format(cita.fechaHora, 'HH:mm') == '17:00'}">05:00 PM</option>
+                            </select>
+                            <small class="form-text">Horario de atención: 8:00 AM - 5:00 PM</small>
+                        </div>
+
+                        <!-- Información del Servicio (Preview) -->
+                        <div class="form-group-full" th:if="${servicioSeleccionado != null}">
+                            <div class="service-preview">
+                                <h4 th:text="${servicioSeleccionado.nombre}">Nombre del Servicio</h4>
+                                <p th:text="${servicioSeleccionado.descripcion}">Descripción del servicio seleccionado</p>
+                                <div class="service-price" th:text="'$' + ${servicioSeleccionado.precio}">$0</div>
+                                <small style="color: var(--text-light);">
+                                    <i class="fas fa-clock"></i>
+                                    Duración: <span th:text="${servicioSeleccionado.duracion}"></span>
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Notas Adicionales -->
+                        <div class="form-group-full">
+                            <label class="form-label">Notas Adicionales</label>
+                            <textarea class="form-control" name="notas" 
+                                      th:text="${cita.notas}"
+                                      placeholder="Describe brevemente tu motivo de consulta o alguna información adicional que consideres importante..."
+                                      rows="4"></textarea>
+                            <small class="form-text">Opcional: síntomas, alergias, medicamentos, etc.</small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <a th:href="@{/user/citas}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-calendar-check"></i>
+                                <span th:if="${cita.id == null}">Agendar Cita</span>
+                                <span th:if="${cita.id != null}">Actualizar Cita</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Información Importante -->
+            <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--primary);">
+                <h4 style="color: var(--primary); margin-bottom: 1rem;">
+                    <i class="fas fa-info-circle"></i> Información Importante
+                </h4>
+                <ul style="color: var(--text-light); list-style-position: inside;">
+                    <li>Las citas deben agendarse con al menos 24 horas de anticipación</li>
+                    <li>Puedes cancelar o modificar tu cita hasta 2 horas antes</li>
+                    <li>Llega 15 minutos antes de tu cita programada</li>
+                    <li>Trae tu identificación y documentos médicos relevantes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript MÍNIMO necesario -->
+    <script>
+        // Establecer fecha mínima como hoy
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="fecha"]').min = today;
+    </script>
+</body>
+</html>

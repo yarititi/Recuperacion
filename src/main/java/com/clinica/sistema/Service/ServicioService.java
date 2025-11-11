@@ -1,6 +1,6 @@
 package com.clinica.sistema.Service;
 
-import com.clinica.sistema.Entity.Servicio;
+import com.clinica.sistema.Entity.ServicioEntity;
 import com.clinica.sistema.Repository.ServicioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,15 +13,15 @@ public class ServicioService {
     @Autowired
     private ServicioRepository servicioRepository;
     
-    public List<Servicio> findAll() {
+    public List<ServicioEntity> findAll() {
         return servicioRepository.findAll();
     }
     
-    public Optional<Servicio> findById(Long id) {
+    public Optional<ServicioEntity> findById(Long id) {
         return servicioRepository.findById(id);
     }
     
-    public Servicio save(Servicio servicio) {
+    public ServicioEntity save(ServicioEntity servicio) {
         return servicioRepository.save(servicio);
     }
 }

@@ -1,57 +1,107 @@
 package com.clinica.sistema.Controller;
 
-import com.clinica.sistema.Entity.Cita;
-import com.clinica.sistema.Entity.Servicio;
-import com.clinica.sistema.Entity.Usuario;
-import com.clinica.sistema.Service.CitaService;
-import com.clinica.sistema.Service.ServicioService;
+import com.clinica.sistema.Entity.UsuarioEntity;
 import com.clinica.sistema.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/user/perfil")  // ← RUTA BASE PARA GESTIÓN DE PERFIL
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
-    @Autowired
-    private ServicioService servicioService;
-
-    @Autowired
-    private CitaService citaService;
-
-    @GetMapping("/dashboard")
-    public String dashboard(Authentication authentication, Model model) {
+    // 👤 VER PERFIL DEL USUARIO
+    @GetMapping
+    public String verPerfil(Authentication authentication, Model model) {
         String email = authentication.getName();
-        Usuario usuario = usuarioService.findByEmail(email).orElseThrow();
-        List<Cita> citas = citaService.findByUsuarioId(usuario.getId());
+        UsuarioEntity usuario = usuarioService.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         model.addAttribute("usuario", usuario);
-        model.addAttribute("citas", citas);
-        return "user/dashboard";
+        return "user/perfil/ver";
     }
 
-    @GetMapping("/citas/nueva")
-    public String nuevaCitaForm(Model model) {
-        List<Servicio> servicios = servicioService.findAll();
-        model.addAttribute("cita", new Cita());
-        model.addAttribute("servicios", servicios);
-        return "user/nueva-cita";
-    }
-
-    @PostMapping("/citas/nueva")
-    public String crearCita(@ModelAttribute Cita cita, Authentication authentication) {
+    // ✏️ MOSTRAR FORMULARIO PARA EDITAR PERFIL
+    @GetMapping("/editar")
+    public String editarPerfilForm(Authentication authentication, Model model) {
         String email = authentication.getName();
-        Usuario usuario = usuarioService.findByEmail(email).orElseThrow();
-        cita.setUsuario(usuario);
-        citaService.save(cita);
-        return "redirect:/user/dashboard?success";
+        UsuarioEntity usuario = usuarioService.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        model.addAttribute("usuario", usuario);
+        return "user/perfil/editar";
+    }
+
+    // 💾 ACTUALIZAR PERFIL
+    @PostMapping("/actualizar")
+    public String actualizarPerfil(@ModelAttribute UsuarioEntity usuarioActualizado,
+                                  Authentication authentication,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            String email = authentication.getName();
+            UsuarioEntity usuarioExistente = usuarioService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            // Actualizar solo los campos permitidos
+            usuarioExistente.setNombre(usuarioActualizado.getNombre());
+            usuarioExistente.setTelefono(usuarioActualizado.getTelefono());
+            
+            usuarioService.save(usuarioExistente);
+            
+            redirectAttributes.addFlashAttribute("success", "Perfil actualizado exitosamente");
+            return "redirect:/user/perfil";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar perfil: " + e.getMessage());
+            return "redirect:/user/perfil/editar";
+        }
+    }
+
+    // 🔐 CAMBIAR CONTRASEÑA (FORMULARIO)
+    @GetMapping("/cambiar-password")
+    public String cambiarPasswordForm() {
+        return "user/perfil/cambiar-password";
+    }
+
+    // 🔐 ACTUALIZAR CONTRASEÑA
+    @PostMapping("/actualizar-password")
+    public String actualizarPassword(@RequestParam String passwordActual,
+                                    @RequestParam String nuevaPassword,
+                                    @RequestParam String confirmarPassword,
+                                    Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            String email = authentication.getName();
+            UsuarioEntity usuario = usuarioService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            // Validaciones
+            if (!nuevaPassword.equals(confirmarPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Las contraseñas no coinciden");
+                return "redirect:/user/perfil/cambiar-password";
+            }
+            
+            if (nuevaPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("error", "La contraseña debe tener al menos 6 caracteres");
+                return "redirect:/user/perfil/cambiar-password";
+            }
+            
+            // Actualizar contraseña
+            usuario.setPassword(nuevaPassword);
+            usuarioService.save(usuario);
+            
+            redirectAttributes.addFlashAttribute("success", "Contraseña actualizada exitosamente");
+            return "redirect:/user/perfil";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al cambiar contraseña: " + e.getMessage());
+            return "redirect:/user/perfil/cambiar-password";
+        }
     }
 }

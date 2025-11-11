@@ -1,19 +1,8 @@
 package com.clinica.sistema.Entity;
 
-import javax.persistence.*;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,10 +19,10 @@ public class ProfesionalEntity {
     
     @OneToOne
     @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
+    private UsuarioEntity usuario;
     
     @OneToMany(mappedBy = "profesional", cascade = CascadeType.ALL)
-    private List<Cita> citas;
+    private List<CitaEntity> citas = new ArrayList<>();
     
     // Getters y Setters
     public Long getId() { return id; }
@@ -42,8 +31,8 @@ public class ProfesionalEntity {
     public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
     public LocalDateTime getHorarioDisponible() { return horarioDisponible; }
     public void setHorarioDisponible(LocalDateTime horarioDisponible) { this.horarioDisponible = horarioDisponible; }
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
-    public List<Cita> getCitas() { return citas; }
-    public void setCitas(List<Cita> citas) { this.citas = citas; }
+    public UsuarioEntity getUsuario() { return usuario; }
+    public void setUsuario(UsuarioEntity usuario) { this.usuario = usuario; }
+    public List<CitaEntity> getCitas() { return citas; }
+    public void setCitas(List<CitaEntity> citas) { this.citas = citas; }
 }

@@ -1,7 +1,5 @@
 package com.clinica.sistema.Entity;
 
-import javax.persistence.*;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -43,7 +41,7 @@ public class CitaEntity {
         this.estado = "PENDIENTE";
     }
     
-    public CitaEntity(LocalDateTime fechaHora, Usuario usuario, Servicio servicio, Profesional profesional) {
+    public CitaEntity(LocalDateTime fechaHora, UsuarioEntity usuario, ServicioEntity servicio, ProfesionalEntity profesional) {
         this();
         this.fechaHora = fechaHora;
         this.usuario = usuario;
@@ -80,7 +78,7 @@ public class CitaEntity {
         return usuario;
     }
 
-    public void setUsuario(Usuario usuario) {
+    public void setUsuario(UsuarioEntity usuario) {
         this.usuario = usuario;
     }
 
@@ -88,15 +86,15 @@ public class CitaEntity {
         return servicio;
     }
 
-    public void setServicio(Servicio servicio) {
+    public void setServicio(ServicioEntity servicio) {
         this.servicio = servicio;
     }
 
-    public Profesional getProfesional() {
+    public ProfesionalEntity getProfesional() {
         return profesional;
     }
 
-    public void setProfesional(Profesional profesional) {
+    public void setProfesional(ProfesionalEntity profesional) {
         this.profesional = profesional;
     }
 }

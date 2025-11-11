@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import jakarta.persistence.*;
+
 
 @Entity
 @Table(name = "usuario")

@@ -14,28 +14,32 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SegurityConfig {
 
-    @Autowired
+	@Autowired
     private CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/login", "/register").permitAll()
+                // Rutas públicas
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                // Rutas por roles
                 .requestMatchers("/user/**").hasRole("USER")
                 .requestMatchers("/profesional/**").hasRole("PROFESIONAL")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // Cualquier otra ruta requiere autenticación
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/dashboard")
+                .defaultSuccessUrl("/dashboard", true)
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .permitAll()
-            )
+            	    .logoutUrl("/logout")
+            	    .logoutSuccessUrl("/")  // ← Te manda al inicio en lugar del login
+            	    .permitAll()
+            	)
             .userDetailsService(customUserDetailsService);
 
         return http.build();

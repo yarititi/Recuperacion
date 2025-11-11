@@ -23,7 +23,7 @@ public class ServicioEntity {
     private Double precio;
     
     @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL)
-    private List<Cita> citas;
+    private List<CitaEntity> citas;
     
     // Getters y Setters
     public Long getId() { return id; }
@@ -36,6 +36,6 @@ public class ServicioEntity {
     public void setDuracion(String duracion) { this.duracion = duracion; }
     public Double getPrecio() { return precio; }
     public void setPrecio(Double precio) { this.precio = precio; }
-    public List<Cita> getCitas() { return citas; }
-    public void setCitas(List<Cita> citas) { this.citas = citas; }
+    public List<CitaEntity> getCitas() { return citas; }
+    public void setCitas(List<CitaEntity> citas) { this.citas = citas; }
 }
