@@ -109,7 +109,7 @@ public class CitaController {
             citaService.save(cita);
             
             redirectAttributes.addFlashAttribute("success", "Cita agendada exitosamente");
-            return "redirect:/user/citas";
+            return "user/citas/formulario";
             
         } catch (Exception e) {
             // En caso de error, recargar el formulario con los datos
@@ -166,7 +166,7 @@ public class CitaController {
         model.addAttribute("profesionales", profesionales);
         model.addAttribute("usuario", usuario);
         
-        return "user/citas/formulario";
+        return "user/citas/detalle";
     }
 
     // 👀 VER DETALLES DE UNA CITA

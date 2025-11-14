@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Cita - Clínica Médica</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 80px 20px 20px 20px;
+            background: #f8fafc;
+        }
+        
+        .navbar {
+            background: #1e293b;
+            padding: 1rem;
+            color: white;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .detail-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .info-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .info-item {
+            margin-bottom: 1rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            color: #1e293b;
+            font-size: 1rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .status-pendiente {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-confirmada {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-cancelada {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" style="color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold;">
+                <i class="fas fa-hospital"></i> Clínica Médica
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Detalle de Cita</h1>
+                <p>Información completa de tu cita médica</p>
+            </div>
+            <a href="/user/citas" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <div class="detail-card">
+            <!-- Información General -->
+            <div class="info-section">
+                <h3 class="section-title">Información General</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Estado</div>
+                        <div class="info-value">
+                            <span th:classappend="'status-badge status-' + ${cita.estado.toLowerCase()}" 
+                                  th:text="${cita.estado}">PENDIENTE</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Fecha</div>
+                        <div class="info-value" th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">01/01/2024</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Hora</div>
+                        <div class="info-value" th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">10:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Servicio Médico -->
+            <div class="info-section">
+                <h3 class="section-title">Servicio Médico</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Servicio</div>
+                        <div class="info-value" th:text="${cita.servicio.nombre}">Consulta General</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Precio</div>
+                        <div class="info-value" th:text="'$' + ${cita.servicio.precio}">$50.000</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Duración</div>
+                        <div class="info-value" th:text="${cita.servicio.duracion}">30 minutos</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Descripción</div>
+                        <div class="info-value" th:text="${cita.servicio.descripcion}">Descripción del servicio</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profesional -->
+            <div class="info-section">
+                <h3 class="section-title">Profesional</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Médico</div>
+                        <div class="info-value" th:text="${cita.profesional.usuario.nombre}">Dr. Juan Pérez</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Especialidad</div>
+                        <div class="info-value" th:text="${cita.profesional.especialidad}">Medicina General</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notas Adicionales -->
+            <div class="info-section" th:if="${cita.notas}">
+                <h3 class="section-title">Notas Adicionales</h3>
+                <div class="info-item">
+                    <div class="info-value" th:text="${cita.notas}">Notas del paciente</div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="actions">
+                <a th:href="@{/user/citas}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <a th:href="@{/user/citas/{id}/editar(id=${cita.id})}" 
+                   class="btn btn-warning"
+                   th:if="${cita.estado == 'PENDIENTE'}">
+                    <i class="fas fa-edit"></i> Editar Cita
+                </a>
+                <form th:action="@{/user/citas/{id}/cancelar(id=${cita.id})}" 
+                      method="post" 
+                      style="display: inline;"
+                      th:if="${cita.estado == 'PENDIENTE'}">
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('¿Estás seguro de que quieres cancelar esta cita?')">
+                        <i class="fas fa-times"></i> Cancelar Cita
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

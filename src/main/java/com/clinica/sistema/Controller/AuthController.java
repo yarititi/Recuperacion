@@ -17,13 +17,13 @@ public class AuthController {
 
     @GetMapping("/login")
     public String login() {
-        return "login";
+        return "auth/login";
     }
 
     @GetMapping("/register")
     public String registerForm(Model model) {
         model.addAttribute("usuario", new UsuarioEntity());
-        return "register";
+        return "auth/register";
     }
 
     @PostMapping("/register")
@@ -33,7 +33,7 @@ public class AuthController {
             if (usuarioService.existsByEmail(usuario.getEmail())) {
                 model.addAttribute("error", "El email ya está registrado");
                 model.addAttribute("usuario", usuario);
-                return "register";
+                return "auth/register";
             }
             
             // Asignar rol por defecto
@@ -48,7 +48,7 @@ public class AuthController {
         } catch (Exception e) {
             model.addAttribute("error", "Error al registrar usuario: " + e.getMessage());
             model.addAttribute("usuario", usuario);
-            return "register";
+            return "auth/register";
         }
     }
 

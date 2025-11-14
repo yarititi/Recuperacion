@@ -20,4 +20,8 @@ public interface ServicioRepository extends JpaRepository<ServicioEntity, Long> 
     
     // Ordenar servicios por precio descendente
     List<ServicioEntity> findAllByOrderByPrecioDesc();
+    
+   
+    
+    
 }

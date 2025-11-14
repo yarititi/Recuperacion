@@ -3,45 +3,33 @@ package com.clinica.sistema.Repository;
 import com.clinica.sistema.Entity.CitaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface CitaRepository extends JpaRepository<CitaEntity, Long> {
     
-    // Buscar citas por ID de usuario
+    // Encontrar citas por usuario
     List<CitaEntity> findByUsuarioId(Long usuarioId);
     
-    // Buscar citas por ID de profesional
+    // Encontrar citas por profesional
     List<CitaEntity> findByProfesionalId(Long profesionalId);
     
-    // Buscar citas por estado
+    // Encontrar citas por estado
     List<CitaEntity> findByEstado(String estado);
     
-    // Buscar citas por fecha
+    // Encontrar citas por fecha range
     List<CitaEntity> findByFechaHoraBetween(LocalDateTime start, LocalDateTime end);
     
-    // Buscar citas de un usuario con toda la información relacionada
-    @Query("SELECT c FROM CitaEntity c " +
-           "JOIN FETCH c.servicio " +
-           "JOIN FETCH c.profesional p " +
-           "JOIN FETCH p.usuario " +
-           "WHERE c.usuario.id = :usuarioId")
-    List<CitaEntity> findByUsuarioIdWithDetails(Long usuarioId);
+    // Verificar disponibilidad de profesional en fecha/hora
+    @Query("SELECT COUNT(c) > 0 FROM CitaEntity c WHERE c.profesional.id = :profesionalId AND c.fechaHora = :fechaHora AND c.estado != 'CANCELADA'")
+    boolean existsByProfesionalAndFechaHora(@Param("profesionalId") Long profesionalId, 
+                                           @Param("fechaHora") LocalDateTime fechaHora);
     
-    // Buscar citas de un profesional con toda la información relacionada
-    @Query("SELECT c FROM CitaEntity c " +
-           "JOIN FETCH c.servicio " +
-           "JOIN FETCH c.usuario " +
-           "WHERE c.profesional.id = :profesionalId")
-    List<CitaEntity> findByProfesionalIdWithDetails(Long profesionalId);
-    
-    // Contar citas por estado
-    @Query("SELECT c.estado, COUNT(c) FROM CitaEntity c GROUP BY c.estado")
-    List<Object[]> countCitasByEstado();
-    
-    // Buscar citas pendientes para hoy
-    @Query("SELECT c FROM CitaEntity c WHERE DATE(c.fechaHora) = CURRENT_DATE AND c.estado = 'PENDIENTE'")
-    List<CitaEntity> findCitasPendientesHoy();
+    // Encontrar citas pendientes de un usuario
+    @Query("SELECT c FROM CitaEntity c WHERE c.usuario.id = :usuarioId AND c.estado = 'PENDIENTE' ORDER BY c.fechaHora ASC")
+    List<CitaEntity> findPendientesByUsuarioId(@Param("usuarioId") Long usuarioId);
 }

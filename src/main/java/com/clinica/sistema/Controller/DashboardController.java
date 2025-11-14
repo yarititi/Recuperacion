@@ -16,7 +16,7 @@ public class DashboardController {
             String rol = obtenerRolUsuario(authentication);
             model.addAttribute("rolUsuario", rol);
         }
-        return "dashboard";
+        return "user/dashboard";
     }
 
     private String obtenerRolUsuario(Authentication authentication) {

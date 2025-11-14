@@ -480,24 +480,20 @@
                 </div>
             </div>
 
-            <!-- Quick Stats -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
-                <div style="background: var(--light); padding: 1.5rem; border-radius: 10px; text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" th:text="${#lists.size(citas)}">0</div>
-                    <div style="color: var(--text-light);">Total de Citas</div>
-                </div>
-                <div style="background: var(--light); padding: 1.5rem; border-radius: 10px; text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--warning);" 
-                         th:text="${#lists.size(#lists.select(citas, ${cita.estado == 'PENDIENTE'}))}">0</div>
-                    <div style="color: var(--text-light);">Pendientes</div>
-                </div>
-                <div style="background: var(--light); padding: 1.5rem; border-radius: 10px; text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--success);" 
-                         th:text="${#lists.size(#lists.select(citas, ${cita.estado == 'CONFIRMADA'}))}">0</div>
-                    <div style="color: var(--text-light);">Confirmadas</div>
-                </div>
-            </div>
-        </div>
+			<!-- Información Útil -->
+			            <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--primary); margin-top: 2rem;">
+			                <h4 style="color: var(--primary); margin-bottom: 1rem;">
+			                    <i class="fas fa-info-circle"></i> Información Importante
+			                </h4>
+			                <ul style="color: var(--text-light); list-style-position: inside; line-height: 1.8;">
+			                    <li>Las citas pueden cancelarse hasta 2 horas antes de la hora programada</li>
+			                    <li>Llega 15 minutos antes de tu cita para completar el registro</li>
+			                    <li>Trae tu identificación y documentos médicos relevantes</li>
+			                    <li>Para emergencias, contacta directamente con la clínica</li>
+			                </ul>
+			            </div>
+			        </div>
+			    </div>
     </div>
 </body>
 </html>

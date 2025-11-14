@@ -37,7 +37,7 @@ public class SegurityConfig {
             )
             .logout(logout -> logout
             	    .logoutUrl("/logout")
-            	    .logoutSuccessUrl("/")  // ← Te manda al inicio en lugar del login
+            	    .logoutSuccessUrl("/")  
             	    .permitAll()
             	)
             .userDetailsService(customUserDetailsService);
