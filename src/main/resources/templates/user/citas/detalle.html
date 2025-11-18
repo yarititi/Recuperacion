@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymyleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de Cita - Clínica Médica</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -98,29 +94,14 @@
             margin: 5px;
         }
         
-        .btn-secondary {
-            background: #6c757d;
-        }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
         
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
+        .btn-primary { background: #2563eb; }
+        .btn-primary:hover { background: #1d4ed8; }
         
-        .btn-primary {
-            background: #2563eb;
-        }
-        
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
         
         .card {
             background: white;
@@ -130,19 +111,14 @@
             margin-bottom: 2rem;
         }
         
-        .info-grid {
-            display: grid;
-            gap: 1.5rem;
-        }
+        .info-grid { display: grid; gap: 1.5rem; }
         
         .info-item {
             padding-bottom: 1.5rem;
             border-bottom: 1px solid #e2e8f0;
         }
         
-        .info-item:last-child {
-            border-bottom: none;
-        }
+        .info-item:last-child { border-bottom: none; }
         
         .info-label {
             font-weight: 600;
@@ -164,20 +140,9 @@
             font-size: 0.9rem;
         }
         
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        
-        .status-confirmed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status-cancelled {
-            background: #fee2e2;
-            color: #dc2626;
-        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-confirmed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #dc2626; }
         
         .action-buttons {
             display: flex;
@@ -187,51 +152,38 @@
         }
 
         @media (max-width: 768px) {
-            body {
-                padding-top: 100px;
-            }
-            
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
+            body { padding-top: 100px; }
+            .nav-container { flex-direction: column; gap: 1rem; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .action-buttons { flex-direction: column; }
+            .btn { width: 100%; text-align: center; }
         }
     </style>
 </head>
+
 <body>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-			<a class="navbar-brand" th:href="@{/user/dashboard}">
-			    <i class="fas fa-hospital"></i>
-			    Clínica Médica
-			</a>>
+            <a class="navbar-brand" th:href="@{/user/dashboard}">
+                <i class="fas fa-hospital"></i> Clínica Médica
+            </a>
+
             <ul class="navbar-nav">
                 <li><a class="nav-link" th:href="@{/user/dashboard}">
-                    <i class="fas fa-home"></i> Dashboard
-                </a></li>
+                    <i class="fas fa-home"></i> Dashboard</a>
+                </li>
+
                 <li><a class="nav-link" th:href="@{/user/citas/listar}">
-                    <i class="fas fa-calendar-alt"></i> Mis Citas
-                </a></li>
+                    <i class="fas fa-calendar-alt"></i> Mis Citas</a>
+                </li>
+
                 <li><span class="nav-link" style="color: #60a5fa;">
                     <i class="fas fa-user"></i>
                     <span th:text="${usuario.nombre}">Usuario</span>
                 </span></li>
+
                 <li>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-danger">
@@ -245,140 +197,146 @@
 
     <!-- Main Content -->
     <div class="container">
+
         <!-- Page Header -->
         <div class="page-header">
             <div>
                 <h1 class="page-title">
-                    <i class="fas fa-calendar-check"></i>
-                    Detalle de Cita
+                    <i class="fas fa-calendar-check"></i> Detalle de Cita
                 </h1>
-                <p class="page-subtitle">
-                    Información completa de tu cita médica
-                </p>
+                <p>Información completa de tu cita médica</p>
             </div>
+
             <a th:href="@{/user/citas/listar}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                Volver a Mis Citas
+                <i class="fas fa-arrow-left"></i> Volver a Mis Citas
             </a>
         </div>
 
-        <!-- Alert Messages -->
-        <div th:if="${success}" class="alert alert-success" style="background: #f0fdf4; color: #16a34a; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #16a34a;">
-            <i class="fas fa-check-circle"></i>
-            <span th:text="${success}"></span>
+        <!-- Alert -->
+        <div th:if="${success}" 
+             style="background:#f0fdf4;color:#16a34a;padding:1rem;border-radius:8px;margin-bottom:1.5rem;border-left:4px solid #16a34a;">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
         </div>
 
-        <!-- Cita Details Card -->
+        <!-- Card -->
         <div class="card">
             <div class="info-grid">
-                <!-- Servicio -->
+
                 <div class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-stethoscope"></i> Servicio Médico
-                    </span>
+                    <span class="info-label"><i class="fas fa-stethoscope"></i> Servicio Médico</span>
                     <div class="info-value" th:text="${cita.servicio.nombre}"></div>
                 </div>
-                
-                <!-- Profesional -->
+
                 <div class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-user-md"></i> Profesional
-                    </span>
+                    <span class="info-label"><i class="fas fa-user-md"></i> Profesional</span>
                     <div class="info-value">
                         <span th:text="${cita.profesional.usuario.nombre}"></span> - 
                         <span th:text="${cita.profesional.especialidad}"></span>
                     </div>
                 </div>
-                
-                <!-- Fecha y Hora -->
+
                 <div class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-clock"></i> Fecha y Hora
-                    </span>
+                    <span class="info-label"><i class="fas fa-clock"></i> Fecha y Hora</span>
                     <div class="info-value" th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}"></div>
                 </div>
-                
-                <!-- Estado -->
+
                 <div class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-info-circle"></i> Estado
-                    </span>
+                    <span class="info-label"><i class="fas fa-info-circle"></i> Estado</span>
                     <div class="info-value">
                         <span th:if="${cita.estado == 'PENDIENTE'}" class="status-badge status-pending">
                             <i class="fas fa-clock"></i> PENDIENTE
                         </span>
+
                         <span th:if="${cita.estado == 'CONFIRMADA'}" class="status-badge status-confirmed">
                             <i class="fas fa-check"></i> CONFIRMADA
                         </span>
+
                         <span th:if="${cita.estado == 'CANCELADA'}" class="status-badge status-cancelled">
                             <i class="fas fa-times"></i> CANCELADA
                         </span>
                     </div>
                 </div>
-                
-                <!-- Precio -->
+
                 <div class="info-item">
-                    <span class="info-label">
-                        <i class="fas fa-dollar-sign"></i> Precio
-                    </span>
+                    <span class="info-label"><i class="fas fa-dollar-sign"></i> Precio</span>
                     <div class="info-value" style="font-size: 1.25rem; font-weight: 700; color: #10b981;">
                         $<span th:text="${cita.servicio.precio}"></span>
                     </div>
                 </div>
-                
-                <!-- Notas -->
+
                 <div class="info-item" th:if="${cita.notas}">
-                    <span class="info-label">
-                        <i class="fas fa-sticky-note"></i> Notas Adicionales
-                    </span>
-                    <div class="info-value" style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #2563eb;">
+                    <span class="info-label"><i class="fas fa-sticky-note"></i> Notas Adicionales</span>
+                    <div class="info-value" style="background:#f8fafc;padding:1rem;border-radius:8px;border-left:4px solid #2563eb;">
                         <span th:text="${cita.notas}"></span>
                     </div>
                 </div>
-                
-                <!-- Sin notas -->
+
                 <div class="info-item" th:unless="${cita.notas}">
-                    <span class="info-label">
-                        <i class="fas fa-sticky-note"></i> Notas Adicionales
-                    </span>
-                    <div class="info-value" style="color: #94a3b8; font-style: italic;">
+                    <span class="info-label"><i class="fas fa-sticky-note"></i> Notas Adicionales</span>
+                    <div class="info-value" style="color:#94a3b8;font-style:italic;">
                         No se agregaron notas para esta cita
                     </div>
                 </div>
+
             </div>
-            
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <a th:href="@{/user/citas/listar}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver al Listado
-                </a>
-                <a th:href="@{/user/citas/editar/{id}(id=${cita.id})}" class="btn btn-primary"
-                   th:if="${cita.estado != 'CANCELADA'}">
-                    <i class="fas fa-edit"></i> Editar Cita
-                </a>
-                <form th:action="@{/user/citas/cancelar/{id}(id=${cita.id})}" method="post" style="display: inline;">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit" class="btn btn-danger"
-                            th:if="${cita.estado != 'CANCELADA'}"
-                            onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">
-                        <i class="fas fa-times"></i> Cancelar Cita
-                    </button>
-                </form>
-            </div>
+			
+
+            <!-- ACTION BUTTONS -->
+			<div class="action-buttons">
+
+			    <!-- VOLVER -->
+			    <a th:href="@{/user/citas/listar}" class="btn btn-secondary">
+			        <i class="fas fa-arrow-left"></i> Volver
+			    </a>
+
+			    <!-- EDITAR (solo si NO está cancelada) -->
+			    <a th:if="${cita.estado != 'CANCELADA'}"
+			       th:href="@{/user/citas/editar/{id}(id=${cita.id})}"
+			       class="btn btn-primary">
+			        <i class="fas fa-edit"></i> Editar
+			    </a>
+
+			    <!-- CANCELAR (solo si NO está cancelada) -->
+			    <form th:if="${cita.estado != 'CANCELADA'}"
+			          th:action="@{/user/citas/cancelar/{id}(id=${cita.id})}"
+			          method="post" style="display: inline;">
+			        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+			        <button type="submit" class="btn btn-warning"
+			                onclick="return confirm('¿Deseas cancelar esta cita?')">
+			            <i class="fas fa-ban"></i> Cancelar
+			        </button>
+			    </form>
+
+			    <!-- ELIMINAR (solo si ESTÁ cancelada) -->
+			    <th:block th:if="${#strings.equalsIgnoreCase(#strings.trim(cita.estado), 'CANCELADA')}">
+			        <form th:action="@{/user/citas/eliminar/{id}(id=${cita.id})}"
+			              method="post"
+			              style="display: inline;">
+			            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			            <button type="submit" class="btn btn-danger"
+			                    onclick="return confirm('¿Eliminar esta cita permanentemente?')">
+			                <i class="fas fa-trash"></i> Eliminar Cita
+			            </button>
+			        </form>
+			    </th:block>
+
+			</div>
+
         </div>
 
         <!-- Información Importante -->
-        <div class="card" style="background: #f0f9ff; border-left: 4px solid #2563eb;">
-            <h4 style="color: #2563eb; margin-bottom: 1rem;">
+        <div class="card" style="background:#f0f9ff;border-left:4px solid #2563eb;">
+            <h4 style="color:#2563eb;margin-bottom:1rem;">
                 <i class="fas fa-info-circle"></i> Información Importante
             </h4>
-            <ul style="color: #64748b; line-height: 1.8; list-style-position: inside;">
+            <ul style="color:#64748b;line-height:1.8;list-style-position:inside;">
                 <li><strong>Anticipación:</strong> Las citas deben agendarse con al menos 24 horas de anticipación</li>
                 <li><strong>Modificaciones:</strong> Puedes cancelar o modificar tu cita hasta 2 horas antes</li>
                 <li><strong>Puntualidad:</strong> Llega 15 minutos antes de tu cita programada</li>
                 <li><strong>Documentación:</strong> Trae tu identificación y documentos médicos relevantes</li>
             </ul>
         </div>
+
     </div>
 </body>
 </html>

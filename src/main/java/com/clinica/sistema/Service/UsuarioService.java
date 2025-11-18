@@ -59,7 +59,7 @@ public class UsuarioService implements UserDetailsService {
         );
     }
 
-    // ✅ MÉTODOS PARA ADMIN CONTROLLER
+    // MÉTODOS PARA ADMIN CONTROLLER
     public long countAllUsers() {
         return usuarioRepository.count();
     }
@@ -70,12 +70,19 @@ public class UsuarioService implements UserDetailsService {
         
         // Si no, usa esta implementación:
         return usuarioRepository.findAll().stream()
-                .sorted((u1, u2) -> u2.getFechaCreacion().compareTo(u1.getFechaCreacion()))
+                .filter(u -> u.getFechaCreacion() != null) // Filtrar usuarios con fechaCreacion nula
+                .sorted((u1, u2) -> {
+                    // Manejo seguro de fechas nulas
+                    if (u1.getFechaCreacion() == null && u2.getFechaCreacion() == null) return 0;
+                    if (u1.getFechaCreacion() == null) return 1; // Los nulos van al final
+                    if (u2.getFechaCreacion() == null) return -1; // Los nulos van al final
+                    return u2.getFechaCreacion().compareTo(u1.getFechaCreacion());
+                })
                 .limit(5)
                 .collect(Collectors.toList());
     }
 
-    // ✅ TUS MÉTODOS EXISTENTES
+    // TUS MÉTODOS EXISTENTES
     public List<UsuarioEntity> findAll() {
         return usuarioRepository.findAll();
     }

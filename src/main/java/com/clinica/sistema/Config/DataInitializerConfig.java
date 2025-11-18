@@ -30,6 +30,7 @@ public class DataInitializerConfig implements CommandLineRunner {
             admin.setActivo(true);
             admin.setFechaRegistro(LocalDateTime.now());
             admin.setFechaCreacion(LocalDateTime.now());
+            admin.setTelefono("1234567890");
             
             usuarioRepository.save(admin);
             System.out.println("✅ Usuario ADMIN creado: admin@clinica.com / admin123");
@@ -45,6 +46,7 @@ public class DataInitializerConfig implements CommandLineRunner {
             doctor.setActivo(true);
             doctor.setFechaRegistro(LocalDateTime.now());
             doctor.setFechaCreacion(LocalDateTime.now());
+            doctor.setTelefono("0987654321");
             
             usuarioRepository.save(doctor);
             System.out.println("✅ Usuario PROFESIONAL creado: doctor@clinica.com / doctor123");
@@ -60,6 +62,7 @@ public class DataInitializerConfig implements CommandLineRunner {
             paciente.setActivo(true);
             paciente.setFechaRegistro(LocalDateTime.now());
             paciente.setFechaCreacion(LocalDateTime.now());
+            paciente.setTelefono("5555555555");
             
             usuarioRepository.save(paciente);
             System.out.println("✅ Usuario PACIENTE creado: paciente@clinica.com / paciente123");

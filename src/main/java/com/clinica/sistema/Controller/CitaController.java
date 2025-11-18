@@ -52,6 +52,22 @@ public class CitaController {
             UsuarioEntity usuario = usuarioOpt.get();
             List<CitaEntity> citas = citaService.findByUsuarioId(usuario.getId());
             
+            // Asegurar que el token CSRF esté disponible en la vista
+            model.addAttribute("_csrf", new org.springframework.security.web.csrf.CsrfToken() {
+                @Override
+                public String getHeaderName() {
+                    return "X-CSRF-TOKEN";
+                }
+                @Override
+                public String getParameterName() {
+                    return "_csrf";
+                }
+                @Override
+                public String getToken() {
+                    return ""; // El token real se generará automáticamente
+                }
+            });
+            
             model.addAttribute("citas", citas);
             model.addAttribute("usuario", usuario);
             return "user/citas/listar";
@@ -122,6 +138,16 @@ public class CitaController {
                 return "redirect:/user/citas/listar";
             }
 
+            // Asegurarse de que el estado esté en mayúsculas
+            if (cita.getEstado() != null) {
+                cita.setEstado(cita.getEstado().trim().toUpperCase());
+            } else {
+                cita.setEstado("PENDIENTE");
+            }
+
+            System.out.println("Estado de la cita en editar: " + cita.getEstado());
+            System.out.println("¿Es igual a 'CANCELADA'? " + "CANCELADA".equals(cita.getEstado()));
+
             // Cargar servicios y profesionales
             List<ServicioEntity> servicios = servicioService.findAll();
             List<ProfesionalEntity> profesionales = profesionalService.findAll();
@@ -161,6 +187,30 @@ public class CitaController {
             }
 
             CitaEntity cita = citaOpt.get();
+
+            // Asegurarse de que el estado esté en mayúsculas
+            if (cita.getEstado() != null) {
+                cita.setEstado(cita.getEstado().trim().toUpperCase());
+            } else {
+                cita.setEstado("PENDIENTE");
+            }
+            
+            // Debug: Imprimir el estado actualizado
+            System.out.println("🔍 Estado después de normalización: '" + cita.getEstado() + "'");
+            System.out.println("🔍 Longitud del estado: " + cita.getEstado().length());
+            System.out.println("🔍 ¿Es igual a 'CANCELADA'? " + "CANCELADA".equals(cita.getEstado()));
+
+            // Debug logging
+            System.out.println("\n🔍 === INICIO DE DEPURACIÓN ===");
+            System.out.println("🔍 Verificando cita ID: " + cita.getId());
+            System.out.println("🔍 Estado de la cita: '" + cita.getEstado() + "'");
+            System.out.println("🔍 Longitud del estado: " + (cita.getEstado() != null ? cita.getEstado().length() : 0));
+            System.out.println("🔍 Estado en mayúsculas: '" + cita.getEstado().toUpperCase() + "'");
+            System.out.println("🔍 ¿Es igual a 'CANCELADA'? " + ("CANCELADA".equals(cita.getEstado())));
+            System.out.println("🔍 Usuario dueño: " + cita.getUsuario().getId());
+            System.out.println("🔍 Usuario logueado: " + usuario.getId());
+            System.out.println("🔍 ¿Puede cancelar? " + (!"CANCELADA".equals(cita.getEstado())));
+            System.out.println("🔍 === FIN DE DEPURACIÓN ===\n");
 
             // Verificar que la cita pertenece al usuario
             if (!cita.getUsuario().getId().equals(usuario.getId())) {
@@ -357,6 +407,53 @@ public class CitaController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error al confirmar cita: " + e.getMessage());
             return "redirect:/user/citas/listar";
+        }
+    }
+
+    // ELIMINAR CITA (solo si está cancelada)
+    @PostMapping("/eliminar/{id}")
+    public String eliminarCita(@PathVariable Long id,
+                             Authentication authentication,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            String email = authentication.getName();
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
+            
+            if (usuarioOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/auth/login";
+            }
+
+            UsuarioEntity usuario = usuarioOpt.get();
+            Optional<CitaEntity> citaOpt = citaService.findById(id);
+            
+            if (citaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Cita no encontrada");
+                return "redirect:/user/citas/listar";
+            }
+
+            CitaEntity cita = citaOpt.get();
+
+            // Verificar que la cita pertenece al usuario
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permiso para eliminar esta cita");
+                return "redirect:/user/citas/listar";
+            }
+
+            // Solo permitir eliminar si está cancelada
+            if (!"CANCELADA".equals(cita.getEstado())) {
+                redirectAttributes.addFlashAttribute("error", "Solo se pueden eliminar citas canceladas");
+                return "redirect:/user/citas/" + id;
+            }
+
+            // Eliminar la cita
+            citaService.deleteById(id);
+            redirectAttributes.addFlashAttribute("success", "Cita eliminada exitosamente");
+            return "redirect:/user/citas/listar";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar la cita: " + e.getMessage());
+            return "redirect:/user/citas/" + id;
         }
     }
 }

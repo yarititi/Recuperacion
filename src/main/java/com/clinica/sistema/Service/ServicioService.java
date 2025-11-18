@@ -4,11 +4,13 @@ import com.clinica.sistema.Entity.ServicioEntity;
 import com.clinica.sistema.Repository.ServicioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ServicioService {
 
     @Autowired
@@ -22,12 +24,30 @@ public class ServicioService {
         return servicioRepository.findById(id);
     }
 
+    @Transactional
     public ServicioEntity save(ServicioEntity servicio) {
         return servicioRepository.save(servicio);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         servicioRepository.deleteById(id);
+    }
+    
+    public boolean existsById(Long id) {
+        return servicioRepository.existsById(id);
+    }
+    
+    public List<ServicioEntity> findByNombreContaining(String nombre) {
+        return servicioRepository.findByNombreContainingIgnoreCase(nombre);
+    }
+    
+    public List<ServicioEntity> findByPrecioBetween(Double minPrecio, Double maxPrecio) {
+        return servicioRepository.findByPrecioBetween(minPrecio, maxPrecio);
+    }
+    
+    public List<ServicioEntity> findByActivo(boolean activo) {
+        return servicioRepository.findByActivo(activo);
     }
 
     // Métodos de búsqueda

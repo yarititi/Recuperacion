@@ -329,8 +329,9 @@
                 <p class="auth-subtitle">Crear Cuenta</p>
             </div>
             <div class="auth-body">
-                <form th:action="@{/register}" th:object="${usuario}" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <form th:action="@{/register}" th:object="${usuario}" method="post" id="registerForm">
+                    <input type="hidden" th:name="${_csrf != null ? _csrf.parameterName : '_csrf'}" 
+                           th:value="${_csrf != null ? _csrf.token : ''}" />
                     
                     <!-- Mensajes de error -->
                     <div th:if="${error}" class="alert alert-danger">
@@ -347,139 +348,170 @@
                     <!-- SELECCIÓN DE TIPO DE USUARIO -->
                     <div class="form-group-full">
                         <label class="form-label">Tipo de Usuario *</label>
-                        <div class="user-type-container">
-                            <!-- Paciente -->
-                            <div class="user-type-card paciente selected" onclick="selectUserType('user')">
-                                <div class="user-type-icon">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div class="user-type-title">Paciente</div>
-                                <div class="user-type-desc">
-                                    Agenda citas médicas y gestiona tu salud
-                                </div>
-                                <input type="radio" name="tipoUsuario" value="user" class="user-type-input" checked>
+                        <div class="form-grid">
+                            <!-- Columna 1 -->
+                            <div class="form-group">
+                                <label class="form-label">Nombre Completo *</label>
+                                <input type="text" class="form-control" name="nombre" 
+                                       th:value="${usuario != null ? usuario.nombre : ''}"
+                                       placeholder="Juan Pérez García" required>
+                                <small class="form-text">Nombre completo</small>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
                             </div>
                             
-                            <!-- Profesional -->
-                            <div class="user-type-card profesional" onclick="selectUserType('profesional')">
-                                <div class="user-type-icon">
-                                    <i class="fas fa-user-md"></i>
+                            <div class="form-group">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email"
+                                       th:value="${usuario != null ? usuario.email : ''}"
+                                       placeholder="tu@email.com" required>
+                                <small class="form-text">Email válido</small>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                            </div>
+                            
+                            <!-- Columna 2 -->
+                            <div class="form-group">
+                                <label class="form-label">Teléfono *</label>
+                                <input type="tel" class="form-control" name="telefono" 
+                                       th:value="${usuario != null ? usuario.telefono : ''}"
+                                       placeholder="+57 300 123 4567" 
+                                       pattern="[0-9]{10,15}" 
+                                       title="Ingrese un número de teléfono válido (10-15 dígitos)" 
+                                       required>
+                                <small class="form-text">Número de teléfono (10-15 dígitos)</small>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Contraseña *</label>
+                                <input type="password" class="form-control" name="password" 
+                                       placeholder="••••••" required minlength="6">
+                                <small class="form-text">Mínimo 6 caracteres</small>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                            </div>
+                            
+                            <!-- Campos que ocupan ambas columnas -->
+                            <div class="form-group-full">
+                                <label class="form-label">Confirmar Contraseña *</label>
+                                <input type="password" class="form-control" id="confirmPassword" 
+                                       placeholder="••••••" required minlength="6">
+                                <small class="form-text">Repite tu contraseña</small>
+                                <div class="invalid-feedback" id="passwordMatchError">Las contraseñas no coinciden</div>
+                            </div>
+                            
+                            <!-- Selección de tipo de usuario -->
+                            <div class="form-group-full">
+                                <label class="form-label">Tipo de Usuario *</label>
+                                <div class="user-type-container">
+                                    <!-- Paciente -->
+                                    <div class="user-type-card paciente selected" onclick="selectUserType('user')">
+                                        <div class="user-type-icon">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="user-type-title">Paciente</div>
+                                        <div class="user-type-desc">
+                                            Agenda citas médicas y gestiona tu salud
+                                        </div>
+                                        <input type="radio" name="tipoUsuario" value="user" class="user-type-input" checked>
+                                    </div>
+                                    
+                                    <!-- Profesional -->
+                                    <div class="user-type-card profesional" onclick="selectUserType('profesional')">
+                                        <div class="user-type-icon">
+                                            <i class="fas fa-user-md"></i>
+                                        </div>
+                                        <div class="user-type-title">Profesional</div>
+                                        <div class="user-type-desc">
+                                            Atiende pacientes y gestiona tu consultorio
+                                        </div>
+                                        <input type="radio" name="tipoUsuario" value="profesional" class="user-type-input">
+                                    </div>
                                 </div>
-                                <div class="user-type-title">Profesional</div>
-                                <div class="user-type-desc">
-                                    Atiende pacientes y gestiona tu consultorio
-                                </div>
-                                <input type="radio" name="tipoUsuario" value="profesional" class="user-type-input">
+                                <small class="form-text">Selecciona el tipo de cuenta que necesitas</small>
+                            </div>
+                            
+                            <!-- Botón que ocupa ambas columnas -->
+                            <div class="form-group-full">
+                                <button type="submit" class="btn-auth">
+                                    <i class="fas fa-user-plus"></i>
+                                    Crear Cuenta
+                                </button>
                             </div>
                         </div>
-                        <small class="form-text">Selecciona el tipo de cuenta que necesitas</small>
-                    </div>
-
-                    <!-- FORMULARIO EN 2 COLUMNAS -->
-                    <div class="form-grid">
-                        <!-- Columna 1 -->
-                        <div class="form-group">
-                            <label class="form-label">Nombre Completo *</label>
-                            <input type="text" class="form-control" th:field="*{nombre}" 
-                                   placeholder="Juan Pérez García" required>
-                            <small class="form-text">Nombre completo</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Email *</label>
-                            <input type="email" class="form-control" th:field="*{email}" 
-                                   placeholder="tu@email.com" required>
-                            <small class="form-text">Email válido</small>
-                        </div>
-                        
-                        <!-- Columna 2 -->
-                        <div class="form-group">
-                            <label class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control" th:field="*{telefono}" 
-                                   placeholder="+57 300 123 4567">
-                            <small class="form-text">Opcional</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Contraseña *</label>
-                            <input type="password" class="form-control" th:field="*{password}" 
-                                   placeholder="••••••" required minlength="6">
-                            <small class="form-text">Mínimo 6 caracteres</small>
-                        </div>
-                        
-                        <!-- Campos que ocupan ambas columnas -->
-                        <div class="form-group-full">
-                            <label class="form-label">Confirmar Contraseña *</label>
-                            <input type="password" class="form-control" id="confirmPassword" 
-                                   placeholder="••••••" required minlength="6">
-                            <small class="form-text">Repite tu contraseña</small>
-                        </div>
-                        
-                        <!-- Botón que ocupa ambas columnas -->
-                        <div class="form-group-full">
-                            <button type="submit" class="btn-auth">
-                                <i class="fas fa-user-plus"></i>
-                                Crear Cuenta
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Enlace a Login -->
-                    <div class="auth-link">
-                        <a th:href="@{/login}">¿Ya tienes cuenta? Inicia sesión</a>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Script para validar contraseñas y selección de tipo de usuario -->
-    <script>
-        // Seleccionar tipo de usuario
-        function selectUserType(type) {
-            // Remover selección anterior
-            document.querySelectorAll('.user-type-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            
-            // Agregar selección nueva
-            document.querySelector(`.user-type-card.${type === 'user' ? 'paciente' : 'profesional'}`).classList.add('selected');
-            
-            // Actualizar radio button
-            document.querySelectorAll('input[name="tipoUsuario"]').forEach(radio => {
-                radio.checked = radio.value === type;
-            });
-        }
+        <!-- Script para validar contraseñas, teléfono y selección de tipo de usuario -->
+        <script>
+            // Seleccionar tipo de usuario
+            function selectUserType(type) {
+                const pacienteCard = document.querySelector('.user-type-card.paciente');
+                const profesionalCard = document.querySelector('.user-type-card.profesional');
+                
+                if (type === 'user') {
+                    pacienteCard.classList.add('selected');
+                    profesionalCard.classList.remove('selected');
+                    document.querySelector('input[name="tipoUsuario"][value="user"]').checked = true;
+                } else {
+                    profesionalCard.classList.add('selected');
+                    pacienteCard.classList.remove('selected');
+                    document.querySelector('input[name="tipoUsuario"][value="profesional"]').checked = true;
+                }
+            }
 
-        // Validar contraseñas al enviar formulario
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const password = document.querySelector('input[th\\:field="*{password}"]').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Las contraseñas no coinciden. Por favor, verifica.');
-                return false;
+            // Validación de teléfono en tiempo real
+            const telefonoInput = document.querySelector('input[name="telefono"]');
+            if (telefonoInput) {
+                telefonoInput.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/[^0-9+]/g, '');
+                });
+            }
+
+            // Validar formulario al enviar
+            const form = document.getElementById('registerForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const password = document.querySelector('input[name="password"]').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    const passwordMatchError = document.getElementById('passwordMatchError');
+                    
+                    // Validar que las contraseñas coincidan
+                    if (password !== confirmPassword) {
+                        e.preventDefault();
+                        passwordMatchError.style.display = 'block';
+                        return false;
+                    } else {
+                        passwordMatchError.style.display = 'none';
+                    }
+                    
+                    // Validar longitud mínima de contraseña
+                    if (password.length < 6) {
+                        e.preventDefault();
+                        alert('La contraseña debe tener al menos 6 caracteres.');
+                        return false;
+                    }
+                    
+                    return true;
+                });
             }
             
-            if (password.length < 6) {
-                e.preventDefault();
-                alert('La contraseña debe tener al menos 6 caracteres.');
-                return false;
+            // Validar en tiempo real la coincidencia de contraseñas
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', function() {
+                    const password = document.querySelector('input[name="password"]').value;
+                    const passwordMatchError = document.getElementById('passwordMatchError');
+                    
+                    if (this.value && password !== this.value) {
+                        this.setCustomValidity('Las contraseñas no coinciden');
+                        passwordMatchError.style.display = 'block';
+                    } else {
+                        this.setCustomValidity('');
+                        passwordMatchError.style.display = 'none';
+                    }
+                });
             }
-        });
-
-        // Validar en tiempo real
-        document.getElementById('confirmPassword').addEventListener('input', function() {
-            const password = document.querySelector('input[th\\:field="*{password}"]').value;
-            const confirmPassword = this.value;
-            
-            if (confirmPassword && password !== confirmPassword) {
-                this.style.borderColor = '#dc2626';
-            } else {
-                this.style.borderColor = '';
-            }
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
