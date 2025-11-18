@@ -6,317 +6,234 @@
     <title>Mis Citas - Clínica Médica</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* CSS PARA LISTA DE CITAS */
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #7c3aed;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --light: #f8fafc;
-            --dark: #1e293b;
-            --text: #334155;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            padding-top: 80px;
+            min-height: 100vh;
             line-height: 1.6;
-            color: var(--text);
-            background: #ffffff;
         }
-
-        .container {
+        
+        .navbar {
+            background: #1e293b;
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
             width: 100%;
+            z-index: 1000;
+        }
+        
+        .nav-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
-        }
-
-        /* NAVIGATION */
-        .navbar {
-            background: var(--dark);
-            padding: 1rem 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--shadow);
-        }
-
-        .navbar .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
+        
         .navbar-brand {
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-
+        
         .navbar-nav {
             display: flex;
-            align-items: center;
             gap: 1rem;
             list-style: none;
+            align-items: center;
         }
-
+        
         .nav-link {
             color: white;
             text-decoration: none;
             padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: background 0.3s ease;
+            border-radius: 5px;
+            font-size: 0.9rem;
         }
-
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
         }
-
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #0da271;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #d97706;
-            transform: translateY(-2px);
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-        }
-
-        /* MAIN CONTENT */
-        .citas-container {
-            margin-top: 80px;
-            padding: 2rem 0;
-        }
-
+        
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
+            padding: 2rem 0;
+            border-bottom: 2px solid #e2e8f0;
         }
-
+        
         .page-title {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 800;
-            color: var(--dark);
-        }
-
-        .page-subtitle {
-            color: var(--text-light);
-            margin-top: 0.5rem;
-        }
-
-        /* ALERTS */
-        .alert {
-            padding: 1rem 1.25rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            border-left: 4px solid transparent;
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left-color: #16a34a;
-        }
-
-        .alert-danger {
-            background: #fef2f2;
-            color: #dc2626;
-            border-left-color: #dc2626;
-        }
-
-        /* CITAS TABLE */
-        .citas-table {
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .table-header {
-            background: var(--light);
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .table-header h3 {
-            color: var(--dark);
-            margin: 0;
-        }
-
-        .table-content {
-            padding: 0;
-        }
-
-        .cita-item {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 1rem;
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            align-items: center;
-            transition: background 0.3s ease;
-        }
-
-        .cita-item:hover {
-            background: var(--light);
-        }
-
-        .cita-item:last-child {
-            border-bottom: none;
-        }
-
-        .cita-info h4 {
-            color: var(--dark);
+            color: #1e293b;
             margin-bottom: 0.5rem;
         }
-
-        .cita-desc {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        .cita-fecha {
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .cita-hora {
-            color: var(--text-light);
-        }
-
-        .cita-profesional {
-            font-weight: 500;
-        }
-
-        .cita-estado {
+        
+        .btn {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
+            padding: 12px 24px;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
         }
-
-        .estado-pendiente {
+        
+        .btn-success {
+            background: #10b981;
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
             background: #fef3c7;
             color: #d97706;
         }
-
-        .estado-confirmada {
+        
+        .status-confirmed {
             background: #d1fae5;
             color: #065f46;
         }
-
-        .estado-cancelada {
+        
+        .status-cancelled {
             background: #fee2e2;
-            color: #991b1b;
+            color: #dc2626;
         }
-
-        .estado-completada {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-
-        .cita-actions {
+        
+        .action-buttons {
             display: flex;
             gap: 0.5rem;
         }
-
-        /* EMPTY STATE */
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .btn-view {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .btn-edit {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        
+        .btn-cancel {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        
         .empty-state {
             text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-light);
+            padding: 3rem;
+            color: #64748b;
         }
-
+        
         .empty-state i {
-            font-size: 4rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            color: var(--border);
+            color: #cbd5e1;
         }
 
-        .empty-state h3 {
-            color: var(--text);
-            margin-bottom: 0.5rem;
-        }
-
-        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .citas-container {
-                margin-top: 70px;
+            body {
+                padding-top: 100px;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
             }
             
             .page-header {
@@ -325,29 +242,12 @@
                 gap: 1rem;
             }
             
-            .cita-item {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-                text-align: center;
+            .table-container {
+                overflow-x: auto;
             }
             
-            .cita-actions {
-                justify-content: center;
-            }
-            
-            .navbar-nav {
+            .action-buttons {
                 flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .page-title {
-                font-size: 1.5rem;
-            }
-            
-            .container {
-                padding: 0 15px;
             }
         }
     </style>
@@ -355,17 +255,17 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="container">
-            <a class="navbar-brand" th:href="@{/}">
-                <i class="fas fa-hospital"></i>
-                Clínica Médica
-            </a>
+        <div class="nav-container">
+			<a class="navbar-brand" th:href="@{/user/dashboard}">
+			    <i class="fas fa-hospital"></i>
+			    Clínica Médica
+			</a>
             <ul class="navbar-nav">
-                <li><a class="nav-link" th:href="@{/dashboard}">
+                <li><a class="nav-link" th:href="@{/user/dashboard}">
                     <i class="fas fa-home"></i> Dashboard
                 </a></li>
-                <li><a class="nav-link" th:href="@{/user/citas/nueva}">
-                    <i class="fas fa-calendar-plus"></i> Nueva Cita
+                <li><a class="nav-link" th:href="@{/user/citas/listar}" style="background: #374151;">
+                    <i class="fas fa-calendar-alt"></i> Mis Citas
                 </a></li>
                 <li><span class="nav-link" style="color: #60a5fa;">
                     <i class="fas fa-user"></i>
@@ -373,7 +273,7 @@
                 </span></li>
                 <li>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                        <button type="submit" class="btn btn-danger">
                             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                         </button>
                     </form>
@@ -383,117 +283,96 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="citas-container">
-        <div class="container">
-            <!-- Page Header -->
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">
-                        <i class="fas fa-calendar-alt"></i>
-                        Mis Citas
-                    </h1>
-                    <p class="page-subtitle">Gestiona y revisa todas tus citas médicas programadas</p>
-                </div>
-                <a th:href="@{/user/citas/nueva}" class="btn btn-success">
-                    <i class="fas fa-plus"></i>
-                    Agendar Nueva Cita
-                </a>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Mis Citas
+                </h1>
+                <p class="page-subtitle">
+                    Gestiona todas tus citas médicas programadas
+                </p>
             </div>
+            <a th:href="@{/user/citas/nueva}" class="btn btn-success">
+                <i class="fas fa-plus"></i>
+                Nueva Cita
+            </a>
+        </div>
 
-            <!-- Alert Messages -->
-            <div th:if="${success}" class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                <span th:text="${success}"></span>
-            </div>
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success" style="background: #f0fdf4; color: #16a34a; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #16a34a;">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
+        </div>
 
-            <div th:if="${error}" class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span th:text="${error}"></span>
-            </div>
+        <div th:if="${error}" class="alert alert-danger" style="background: #fef2f2; color: #dc2626; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #dc2626;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+        </div>
 
-            <!-- Citas List -->
-            <div class="citas-table">
-                <div class="table-header">
-                    <h3><i class="fas fa-list"></i> Citas Programadas</h3>
-                </div>
-                
-                <div class="table-content">
-                    <!-- Si hay citas -->
-                    <div th:if="${not #lists.isEmpty(citas)}">
-                        <div th:each="cita : ${citas}" class="cita-item">
-                            <!-- Información de la cita -->
-                            <div class="cita-info">
-                                <h4 th:text="${cita.servicio.nombre}">Consulta General</h4>
-                                <p class="cita-desc" th:text="${cita.servicio.descripcion}">Descripción del servicio</p>
-                            </div>
-                            
-                            <!-- Fecha y Hora -->
-                            <div class="cita-fecha">
-                                <i class="fas fa-calendar"></i>
-                                <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">01/12/2024</span>
-                                <div class="cita-hora" th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">10:00</div>
-                            </div>
-                            
-                            <!-- Profesional -->
-                            <div class="cita-profesional">
-                                <i class="fas fa-user-md"></i>
-                                <span th:text="${cita.profesional.usuario.nombre}">Dr. Carlos López</span>
-                            </div>
-                            
-                            <!-- Estado -->
-                            <div>
-                                <span th:classappend="'cita-estado estado-' + ${cita.estado.toLowerCase()}" 
-                                      th:text="${cita.estado}">PENDIENTE</span>
-                            </div>
-                            
-                            <!-- Acciones -->
-                            <div class="cita-actions">
-                                <a th:href="@{/user/citas/{id}(id=${cita.id})}" 
-                                   class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye"></i>
+        <!-- Citas Table -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Profesional</th>
+                        <th>Fecha y Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${citas.empty}">
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <h3>No tienes citas programadas</h3>
+                                <p>Agenda tu primera cita médica para comenzar</p>
+                                <a th:href="@{/user/citas/nueva}" class="btn btn-success" style="margin-top: 1rem;">
+                                    <i class="fas fa-plus"></i> Agendar Primera Cita
                                 </a>
-                                <a th:href="@{/user/citas/{id}/editar(id=${cita.id})}" 
-                                   class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form th:action="@{/user/citas/{id}/cancelar(id=${cita.id})}" 
-                                      method="post" 
-                                      style="display: inline;"
-                                      th:onclick="return confirm('¿Estás seguro de que quieres cancelar esta cita?')">
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </form>
                             </div>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                     
-                    <!-- Si no hay citas -->
-                    <div th:if="${#lists.isEmpty(citas)}" class="empty-state">
-                        <i class="fas fa-calendar-times"></i>
-                        <h3>No tienes citas programadas</h3>
-                        <p>Parece que aún no has agendado ninguna cita médica.</p>
-                        <a th:href="@{/user/citas/nueva}" class="btn btn-success" style="margin-top: 1rem;">
-                            <i class="fas fa-plus"></i> Agendar tu primera cita
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-			<!-- Información Útil -->
-			            <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--primary); margin-top: 2rem;">
-			                <h4 style="color: var(--primary); margin-bottom: 1rem;">
-			                    <i class="fas fa-info-circle"></i> Información Importante
-			                </h4>
-			                <ul style="color: var(--text-light); list-style-position: inside; line-height: 1.8;">
-			                    <li>Las citas pueden cancelarse hasta 2 horas antes de la hora programada</li>
-			                    <li>Llega 15 minutos antes de tu cita para completar el registro</li>
-			                    <li>Trae tu identificación y documentos médicos relevantes</li>
-			                    <li>Para emergencias, contacta directamente con la clínica</li>
-			                </ul>
-			            </div>
-			        </div>
-			    </div>
+                    <tr th:each="cita : ${citas}">
+                        <td th:text="${cita.servicio.nombre}"></td>
+                        <td th:text="${cita.profesional.usuario.nombre} + ' - ' + ${cita.profesional.especialidad}"></td>
+                        <td th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <span th:if="${cita.estado == 'PENDIENTE'}" class="status-badge status-pending">
+                                <i class="fas fa-clock"></i> PENDIENTE
+                            </span>
+                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="status-badge status-confirmed">
+                                <i class="fas fa-check"></i> CONFIRMADA
+                            </span>
+                            <span th:if="${cita.estado == 'CANCELADA'}" class="status-badge status-cancelled">
+                                <i class="fas fa-times"></i> CANCELADA
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+								<a th:href="@{/user/citas/detalle/{id}(id=${cita.id})}" class="action-btn btn-view">
+								    <i class="fas fa-eye"></i> Ver
+								</a>
+								<a th:href="@{/user/citas/editar/{id}(id=${cita.id})}" class="action-btn btn-edit">
+								    <i class="fas fa-edit"></i> Editar
+								</a>
+								<form th:action="@{/user/citas/cancelar/{id}(id=${cita.id})}" method="post" style="display: inline;">
+								    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+								    <button type="submit" class="action-btn btn-cancel">
+								        <i class="fas fa-times"></i> Cancelar
+								    </button>
+								</form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>

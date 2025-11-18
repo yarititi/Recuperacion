@@ -1,18 +1,8 @@
 package com.clinica.sistema.Entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 @Entity
 @Table(name = "usuario")
@@ -35,7 +25,16 @@ public class UsuarioEntity {
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
     
+    @Column(name = "fecha_creacion")
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
+    
+    @Column(name = "ultimo_acceso")
+    private LocalDateTime ultimoAcceso;
+    
     private String rol;
+    
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
     
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private ProfesionalEntity profesional;
@@ -45,6 +44,8 @@ public class UsuarioEntity {
     
     public UsuarioEntity() {
         this.fechaRegistro = LocalDateTime.now();
+        this.fechaCreacion = LocalDateTime.now();
+        this.activo = true;
     }
     
     // Getters y Setters
@@ -60,8 +61,14 @@ public class UsuarioEntity {
     public void setTelefono(String telefono) { this.telefono = telefono; }
     public LocalDateTime getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public LocalDateTime getUltimoAcceso() { return ultimoAcceso; }
+    public void setUltimoAcceso(LocalDateTime ultimoAcceso) { this.ultimoAcceso = ultimoAcceso; }
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
     public ProfesionalEntity getProfesional() { return profesional; }
     public void setProfesional(ProfesionalEntity profesional) { this.profesional = profesional; }
     public List<CitaEntity> getCitas() { return citas; }

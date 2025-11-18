@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Horarios - Profesional</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .buttons-container {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .btn-custom {
+            padding: 12px 30px;
+            margin: 0 10px;
+            min-width: 160px;
+            font-weight: 600;
+        }
+        .horario-actual {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/profesional/dashboard}">
+                <i class="fas fa-hospital"></i> Clínica Médica
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" th:href="@{/profesional/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a class="nav-link" th:href="@{/profesional/citas}">
+                    <i class="fas fa-calendar-alt"></i> Mis Citas
+                </a>
+                <a class="nav-link" th:href="@{/profesional/pacientes}">
+                    <i class="fas fa-users"></i> Pacientes
+                </a>
+                <a class="nav-link active" th:href="@{/profesional/horarios}">
+                    <i class="fas fa-clock"></i> Horarios
+                </a>
+                <a class="nav-link" th:href="@{/profesional/perfil}">
+                    <i class="fas fa-user-md"></i> Mi Perfil
+                </a>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <!-- Header -->
+        <div class="profile-header text-center">
+            <h2>Gestionar Horarios</h2>
+            <p class="mb-0">Configura tu disponibilidad para citas</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Horario Actual -->
+        <div class="horario-actual" th:if="${profesional.horarioDisponible != null}">
+            <h5><i class="fas fa-clock text-success me-2"></i>Próxima Disponibilidad Actual</h5>
+            <p class="mb-0">
+                <strong th:text="${#temporals.format(profesional.horarioDisponible, 'dd/MM/yyyy HH:mm')}"></strong>
+            </p>
+        </div>
+
+        <!-- Formulario de Horarios -->
+        <form th:action="@{/profesional/horarios/actualizar}" method="post" class="needs-validation" novalidate>
+            <!-- SOLUCIÓN: CSRF Token corregido -->
+            <input type="hidden" th:name="${_csrf?.parameterName ?: '_csrf'}" th:value="${_csrf?.token ?: ''}" />
+            
+            <div class="form-card">
+                <h4 class="mb-4">
+                    <i class="fas fa-calendar-plus text-primary me-2"></i> Configurar Próxima Disponibilidad
+                </h4>
+                
+				<div class="mb-3">
+				    <label for="horarioDisponible" class="form-label">Selecciona fecha y hora disponible:</label>
+				    <input type="datetime-local" 
+				           class="form-control" 
+				           id="horarioDisponible"
+				           name="horarioDisponible"
+				           th:value="${profesional.horarioDisponible != null ? #temporals.format(profesional.horarioDisponible, 'yyyy-MM-dd''T''HH:mm') : ''}">
+				    <div class="form-text">
+				        Los pacientes podrán agendar citas a partir de esta fecha y hora.
+				    </div>
+				</div>
+
+            <!-- BOTONES -->
+            <div class="buttons-container">
+                <div class="d-flex justify-content-center flex-wrap gap-3">
+                    <a th:href="@{/profesional/dashboard}" class="btn btn-secondary btn-custom">
+                        <i class="fas fa-times me-2"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success btn-custom">
+                        <i class="fas fa-save me-2"></i> Guardar Horario
+                    </button>
+                    <button type="button" class="btn btn-warning btn-custom" onclick="limpiarHorario()">
+                        <i class="fas fa-trash me-2"></i> Limpiar Horario
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Información Adicional -->
+        <div class="form-card">
+            <h5 class="mb-3">
+                <i class="fas fa-question-circle text-primary me-2"></i> ¿Cómo funcionan los horarios?
+            </h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Para Profesionales:</h6>
+                    <ul>
+                        <li>Establece tu próxima disponibilidad</li>
+                        <li>Los pacientes verán solo horarios futuros</li>
+                        <li>Puedes modificar tu disponibilidad en cualquier momento</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Para Pacientes:</h6>
+                    <ul>
+                        <li>Ven tu próxima disponibilidad</li>
+                        <li>Agendan citas según tu horario establecido</li>
+                        <li>Reciben confirmación automática</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Limpiar horario
+        function limpiarHorario() {
+            if (confirm('¿Estás seguro de que quieres limpiar tu horario disponible?')) {
+                document.getElementById('horarioDisponible').value = '';
+                document.querySelector('form').submit();
+            }
+        }
+
+        // Validación de formulario
+        (function() {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+
+        // Mostrar loading al enviar
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Guardando...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

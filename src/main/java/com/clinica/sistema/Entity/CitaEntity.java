@@ -1,15 +1,6 @@
 package com.clinica.sistema.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,6 +14,12 @@ public class CitaEntity {
     private LocalDateTime fechaHora;
     
     private String estado;
+    
+    // ✅ AGREGAR ESTE CAMPO
+    private String motivo;
+    
+    @Column(columnDefinition = "TEXT")
+    private String notas;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
@@ -72,6 +69,23 @@ public class CitaEntity {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    // ✅ AGREGAR GETTER Y SETTER PARA MOTIVO
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
+    public String getNotas() {
+        return notas;
+    }
+
+    public void setNotas(String notas) {
+        this.notas = notas;
     }
 
     public UsuarioEntity getUsuario() {

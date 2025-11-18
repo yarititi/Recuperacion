@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Clínica Médica</title>
+    <title>Dashboard Usuario - Clínica Médica</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* CSS PARA DASHBOARD - ACTUALIZADO */
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
@@ -100,31 +99,9 @@
             transition: all 0.3s ease;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #0da271;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
 
         /* DASHBOARD CONTENT */
         .dashboard {
@@ -141,14 +118,27 @@
             text-align: center;
         }
 
-        .welcome-section h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .welcome-section p {
-            font-size: 1.2rem;
-            opacity: 0.9;
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
         }
 
         .dashboard-grid {
@@ -178,30 +168,11 @@
             margin-bottom: 1.5rem;
         }
 
-        .dashboard-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-
-        .dashboard-card p {
-            color: var(--text-light);
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        /* USER INFO */
         .user-info {
             background: var(--light);
             padding: 1.5rem;
             border-radius: 10px;
             margin-bottom: 2rem;
-        }
-
-        .user-info h3 {
-            color: var(--primary);
-            margin-bottom: 1rem;
         }
 
         .user-details {
@@ -217,28 +188,40 @@
             border-left: 4px solid var(--primary);
         }
 
-        .user-detail strong {
-            color: var(--dark);
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
         }
 
-        /* RESPONSIVE */
+        .alert-success {
+            background: #f0fdf4;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border-left-color: #ef4444;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-warning { background: var(--warning); color: white; }
+        .badge-success { background: var(--success); color: white; }
+        .badge-danger { background: var(--danger); color: white; }
+
         @media (max-width: 768px) {
-            .dashboard {
-                margin-top: 70px;
-            }
-            
-            .welcome-section h1 {
-                font-size: 2rem;
-            }
-            
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .navbar-nav {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
+            .dashboard { margin-top: 70px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -246,17 +229,16 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/}">
-                <i class="fas fa-hospital"></i>
-                Clínica Médica
+            <a class="navbar-brand" th:href="@{/usuario/dashboard}">
+                <i class="fas fa-hospital"></i> Clínica Médica
             </a>
             <ul class="navbar-nav">
-                <li><a class="nav-link" th:href="@{/user/citas}">
+                <li><a class="nav-link" th:href="@{/usuario/citas}">
                     <i class="fas fa-calendar-alt"></i> Mis Citas
                 </a></li>
                 <li><span class="nav-link" style="color: #60a5fa;">
                     <i class="fas fa-user"></i>
-                    <span th:text="${#authentication.name}">Usuario</span>
+                    <span th:text="${usuario?.nombre ?: #authentication.name}">Usuario</span>
                 </span></li>
                 <li>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
@@ -272,9 +254,17 @@
     <!-- Dashboard Content -->
     <div class="dashboard">
         <div class="container">
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+            </div>
+
             <!-- Welcome Section -->
             <div class="welcome-section">
-                <h1>¡Bienvenido a tu Dashboard!</h1>
+                <h1>¡Bienvenido, <span th:text="${usuario?.nombre ?: 'Usuario'}">Usuario</span>!</h1>
                 <p>Gestiona tus citas médicas de manera fácil y rápida</p>
             </div>
 
@@ -283,14 +273,34 @@
                 <h3><i class="fas fa-info-circle"></i> Tu Información</h3>
                 <div class="user-details">
                     <div class="user-detail">
-                        <strong>Email:</strong> <span th:text="${#authentication.name}">usuario@ejemplo.com</span>
+                        <strong>Nombre:</strong> <span th:text="${usuario?.nombre ?: 'No disponible'}">Usuario</span>
                     </div>
-					<div class="user-detail">
-					    <strong>Rol:</strong> <span th:text="${rolUsuario}">USER</span>
-					</div>
                     <div class="user-detail">
-                        <strong>Estado:</strong> <span style="color: var(--success);">Activo</span>
+                        <strong>Email:</strong> <span th:text="${usuario?.email ?: #authentication.name}">usuario@ejemplo.com</span>
                     </div>
+                    <div class="user-detail">
+                        <strong>Teléfono:</strong> <span th:text="${usuario?.telefono ?: 'No registrado'}">No registrado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${totalCitas ?: 0}">0</div>
+                    <div>Total Citas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${citasPendientes ?: 0}">0</div>
+                    <div>Pendientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${citasConfirmadas ?: 0}">0</div>
+                    <div>Confirmadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${citasCompletadas ?: 0}">0</div>
+                    <div>Completadas</div>
                 </div>
             </div>
 
@@ -300,7 +310,7 @@
                     <i class="fas fa-calendar-plus card-icon"></i>
                     <h3>Agendar Cita</h3>
                     <p>Reserva una nueva cita médica con nuestros especialistas</p>
-                    <a th:href="@{/user/citas/nueva}" class="btn btn-success">
+                    <a th:href="@{/usuario/citas/nueva}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Agendar Ahora
                     </a>
                 </div>
@@ -309,19 +319,49 @@
                     <i class="fas fa-list-alt card-icon"></i>
                     <h3>Mis Citas</h3>
                     <p>Revisa y gestiona todas tus citas programadas</p>
-                    <a th:href="@{/user/citas}" class="btn btn-primary">
+                    <a th:href="@{/usuario/citas}" class="btn btn-primary">
                         <i class="fas fa-eye"></i> Ver Citas
                     </a>
                 </div>
 
-				<!-- ENLACE CORRECTO PARA PERFIL -->
-				<div class="dashboard-card">
-				    <i class="fas fa-user-edit card-icon"></i>
-				    <h3>Mi Perfil</h3>
-				    <p>Actualiza tu información personal y preferencias</p>
-				    <a th:href="@{/user/perfil/editar}" class="btn btn-primary">Editar Perfil</a>
-				</div>
+                <div class="dashboard-card">
+                    <i class="fas fa-user-edit card-icon"></i>
+                    <h3>Mi Perfil</h3>
+                    <p>Actualiza tu información personal y preferencias</p>
+                    <a th:href="@{/usuario/perfil}" class="btn btn-primary">
+                        <i class="fas fa-user"></i> Ver Perfil
+                    </a>
+                </div>
+            </div>
 
+            <!-- Próximas Citas -->
+            <div class="user-info" th:if="${proximasCitas != null and !proximasCitas.empty}">
+                <h3><i class="fas fa-clock me-2"></i>Próximas Citas</h3>
+                <div style="margin-top: 1rem;">
+                    <div th:each="cita : ${proximasCitas}" class="user-detail" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong th:text="${cita.profesional?.usuario?.nombre}">Dr. Especialista</strong><br>
+                            <small th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}">Fecha</small>
+                            <span th:if="${cita.estado == 'PENDIENTE'}" class="badge badge-warning">PENDIENTE</span>
+                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="badge badge-success">CONFIRMADA</span>
+                            <span th:if="${cita.estado == 'CANCELADA'}" class="badge badge-danger">CANCELADA</span>
+                        </div>
+                        <a th:href="@{/usuario/citas/{id}(id=${cita.id})}" class="btn btn-primary" style="padding: 0.5rem 1rem;">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sin Citas -->
+            <div class="user-info" th:if="${proximasCitas == null or proximasCitas.empty}">
+                <h3><i class="fas fa-calendar-times me-2"></i>No tienes citas programadas</h3>
+                <p style="margin-top: 0.5rem; color: var(--text-light);">
+                    Agenda tu primera cita médica para comenzar a gestionar tu salud.
+                </p>
+                <a th:href="@{/usuario/citas/nueva}" class="btn btn-success" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> Agendar Primera Cita
+                </a>
             </div>
         </div>
     </div>

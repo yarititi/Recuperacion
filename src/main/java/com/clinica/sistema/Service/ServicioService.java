@@ -30,7 +30,7 @@ public class ServicioService {
         servicioRepository.deleteById(id);
     }
 
-    // Método opcional para buscar por nombre
+    // Métodos de búsqueda
     public List<ServicioEntity> buscarPorNombre(String nombre) {
         return servicioRepository.findByNombreContainingIgnoreCase(nombre);
     }
@@ -45,5 +45,22 @@ public class ServicioService {
     
     public List<ServicioEntity> ordenarPorPrecioDesc() {
         return servicioRepository.findAllByOrderByPrecioDesc();
+    }
+
+    // ✅ NUEVOS MÉTODOS PARA ADMIN
+    public long count() {
+        return servicioRepository.count();
+    }
+    
+    public long countByActivo(Boolean activo) {
+        return servicioRepository.findByActivo(activo).size();
+    }
+    
+    public List<ServicioEntity> findByActivo(Boolean activo) {
+        return servicioRepository.findByActivo(activo);
+    }
+    
+    public List<ServicioEntity> findByCategoria(String categoria) {
+        return servicioRepository.findByCategoria(categoria);
     }
 }

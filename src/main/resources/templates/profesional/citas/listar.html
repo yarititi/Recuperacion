@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Citas - Profesional</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        .navbar {
+            background: #1e293b;
+            padding: 1rem 0;
+            color: white;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        
+        /* Botón más grande para "Volver al Dashboard" */
+        .btn-large {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-confirmed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #dc2626; }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
+        .alert-error { background: #fef2f2; color: #dc2626; border-left: 4px solid #ef4444; }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title h1 {
+            margin: 0;
+            color: #1e293b;
+        }
+        
+        .page-title p {
+            margin: 0.5rem 0 0 0;
+            color: #64748b;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+	<!-- Navigation - Similar al usuario -->
+	   <nav class="navbar">
+	       <div class="nav-container">
+	           <a class="navbar-brand" th:href="@{/profesional/dashboard}">
+	               <i class="fas fa-hospital"></i>
+	               Clínica Médica
+	           </a>
+	           <ul class="navbar-nav">
+	               <li><a class="nav-link active" th:href="@{/profesional/dashboard}">
+	                   <i class="fas fa-home"></i> Dashboard
+	               </a></li>
+	               <li><a class="nav-link" th:href="@{/profesional/citas}">
+	                   <i class="fas fa-calendar-alt"></i> Mis Citas
+	               </a></li>
+	               <li><a class="nav-link" th:href="@{/profesional/pacientes}">
+	                   <i class="fas fa-users"></i> Pacientes
+	               </a></li>
+	               <li><a class="nav-link" th:href="@{/profesional/horarios}">
+	                   <i class="fas fa-clock"></i> Horarios
+	               </a></li>
+				<li><a class="nav-link" th:href="@{/profesional/perfil}">
+				                    <i class="fas fa-user-md"></i>
+									<span th:text="${profesional.usuario.nombre}">Profesional</span>
+				                </a></li>
+			
+	                   <form th:action="@{/logout}" method="post" style="display: inline;">
+	                       <button type="submit" class="btn btn-danger">
+	                           <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+	                       </button>
+	                   </form>
+	               </li>
+	           </ul>
+	       </div>
+	   </nav>
+	   
+    <div class="container">
+        <!-- Page Header with Back Button -->
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Mis Citas</h1>
+                <p>Gestiona tus citas médicas</p>
+            </div>
+            <a href="/profesional/dashboard" class="btn btn-secondary btn-large">
+                <i class="fas fa-arrow-left"></i> Volver al Dashboard
+            </a>
+        </div>
+
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${totalCitas}">0</div>
+                <div>Total Citas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${citasHoy}">0</div>
+                <div>Citas Hoy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${citasPendientes}">0</div>
+                <div>Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${citasConfirmadas}">0</div>
+                <div>Confirmadas</div>
+            </div>
+        </div>
+
+        <!-- Lista de Citas -->
+        <div class="card">
+            <h3>Lista de Citas</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cita : ${citas}">
+                        <td>
+                            <div th:text="${cita.usuario.nombre}">Paciente</div>
+                            <small th:text="${cita.usuario.email}">email</small>
+                        </td>
+                        <td th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}">Fecha</td>
+                        <td>
+                            <span th:if="${cita.estado == 'PENDIENTE'}" class="status status-pending">PENDIENTE</span>
+                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="status status-confirmed">CONFIRMADA</span>
+                            <span th:if="${cita.estado == 'CANCELADA'}" class="status status-cancelled">CANCELADA</span>
+                        </td>
+						<td>
+						    <a th:href="@{/profesional/citas/{id}(id=${cita.id})}" class="btn btn-primary">Ver</a>
+						    
+						    <!-- Confirmar con formulario POST -->
+						    <form th:action="@{/profesional/citas/{id}/confirmar(id=${cita.id})}" method="post" style="display: inline;">
+						        <input type="hidden" th:name="${_csrf?.parameterName ?: '_csrf'}" th:value="${_csrf?.token ?: ''}" />
+						        <button type="submit" class="btn btn-success">Confirmar</button>
+						    </form>
+						    
+						    <!-- Cancelar con formulario POST -->
+						    <form th:action="@{/profesional/citas/{id}/cancelar(id=${cita.id})}" method="post" style="display: inline;">
+						        <input type="hidden" th:name="${_csrf?.parameterName ?: '_csrf'}" th:value="${_csrf?.token ?: ''}" />
+						        <button type="submit" class="btn btn-danger">Cancelar</button>
+						    </form>
+						</td>
+                    </tr>
+                    <tr th:if="${citas.empty}">
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: #666;">
+                            No hay citas programadas
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

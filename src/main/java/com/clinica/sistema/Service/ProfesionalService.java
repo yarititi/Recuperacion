@@ -4,6 +4,7 @@ import com.clinica.sistema.Entity.ProfesionalEntity;
 import com.clinica.sistema.Repository.ProfesionalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +26,15 @@ public class ProfesionalService {
         return profesionalRepository.findByUsuarioEmail(email);
     }
     
+    public List<ProfesionalEntity> findByEspecialidad(String especialidad) {
+        return profesionalRepository.findByEspecialidad(especialidad);
+    }
+    
     public ProfesionalEntity save(ProfesionalEntity profesional) {
         return profesionalRepository.save(profesional);
+    }
+    
+    public boolean existsByUsuarioEmail(String email) {
+        return profesionalRepository.findByUsuarioEmail(email).isPresent();
     }
 }

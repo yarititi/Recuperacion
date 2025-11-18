@@ -14,6 +14,9 @@ public class ProfesionalEntity {
     
     private String especialidad;
     
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+    
     @Column(name = "horario_disponible")
     private LocalDateTime horarioDisponible;
     
@@ -24,15 +27,30 @@ public class ProfesionalEntity {
     @OneToMany(mappedBy = "profesional", cascade = CascadeType.ALL)
     private List<CitaEntity> citas = new ArrayList<>();
     
+    // Constructores
+    public ProfesionalEntity() {}
+    
+    public ProfesionalEntity(String especialidad, UsuarioEntity usuario) {
+        this.especialidad = especialidad;
+        this.usuario = usuario;
+    }
+    
     // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    
     public String getEspecialidad() { return especialidad; }
     public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
+    
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    
     public LocalDateTime getHorarioDisponible() { return horarioDisponible; }
     public void setHorarioDisponible(LocalDateTime horarioDisponible) { this.horarioDisponible = horarioDisponible; }
+    
     public UsuarioEntity getUsuario() { return usuario; }
     public void setUsuario(UsuarioEntity usuario) { this.usuario = usuario; }
+    
     public List<CitaEntity> getCitas() { return citas; }
     public void setCitas(List<CitaEntity> citas) { this.citas = citas; }
 }

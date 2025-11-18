@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/user/citas")
@@ -37,184 +38,325 @@ public class CitaController {
     private ProfesionalService profesionalService;
 
     // 📋 LISTAR TODAS LAS CITAS DEL USUARIO
-    @GetMapping
+    @GetMapping("/listar")
     public String listarCitas(Authentication authentication, Model model) {
-        String email = authentication.getName();
-        UsuarioEntity usuario = usuarioService.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        List<CitaEntity> citas = citaService.findByUsuarioId(usuario.getId());
-        model.addAttribute("citas", citas);
-        model.addAttribute("usuario", usuario);
-        
-        return "user/citas/listar";
-    }
-
-    // 📝 MOSTRAR FORMULARIO PARA NUEVA CITA (MODIFICADO)
-    @GetMapping("/nueva")
-    public String mostrarFormularioNuevaCita(
-            @RequestParam(required = false) Long servicioId,
-            Authentication authentication, 
-            Model model) {
-        
-        String email = authentication.getName();
-        UsuarioEntity usuario = usuarioService.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        List<ServicioEntity> servicios = servicioService.findAll();
-        List<ProfesionalEntity> profesionales = profesionalService.findAll();
-        
-        CitaEntity cita = new CitaEntity();
-        
-        // Si hay un servicio seleccionado, establecerlo
-        if (servicioId != null) {
-            ServicioEntity servicioSeleccionado = servicioService.findById(servicioId)
-                .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
-            cita.setServicio(servicioSeleccionado);
-            model.addAttribute("servicioSeleccionado", servicioSeleccionado);
-        }
-        
-        model.addAttribute("cita", cita);
-        model.addAttribute("servicios", servicios);
-        model.addAttribute("profesionales", profesionales);
-        model.addAttribute("usuario", usuario);
-        
-        return "user/citas/formulario";
-    }
-
-    // 💾 GUARDAR NUEVA CITA (MODIFICADO)
-    @PostMapping("/guardar")
-    public String guardarCita(
-            @ModelAttribute CitaEntity cita,
-            @RequestParam String fecha,
-            @RequestParam String hora,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-        
         try {
             String email = authentication.getName();
-            UsuarioEntity usuario = usuarioService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
             
-            // Combinar fecha y hora
-            LocalDate fechaDate = LocalDate.parse(fecha);
-            LocalTime horaTime = LocalTime.parse(hora);
-            LocalDateTime fechaHoraCompleta = LocalDateTime.of(fechaDate, horaTime);
-            cita.setFechaHora(fechaHoraCompleta);
+            if (usuarioOpt.isEmpty()) {
+                model.addAttribute("error", "Usuario no encontrado");
+                return "user/citas/listar";
+            }
+
+            UsuarioEntity usuario = usuarioOpt.get();
+            List<CitaEntity> citas = citaService.findByUsuarioId(usuario.getId());
             
-            cita.setUsuario(usuario);
-            cita.setEstado("PENDIENTE");
-            
-            citaService.save(cita);
-            
-            redirectAttributes.addFlashAttribute("success", "Cita agendada exitosamente");
-            return "user/citas/formulario";
+            model.addAttribute("citas", citas);
+            model.addAttribute("usuario", usuario);
+            return "user/citas/listar";
             
         } catch (Exception e) {
-            // En caso de error, recargar el formulario con los datos
+            model.addAttribute("error", "Error al cargar las citas: " + e.getMessage());
+            return "user/citas/listar";
+        }
+    }
+
+    // 📝 FORMULARIO PARA NUEVA CITA
+    @GetMapping("/nueva")
+    public String nuevaCita(Authentication authentication, Model model) {
+        try {
             String email = authentication.getName();
-            UsuarioEntity usuario = usuarioService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
             
+            if (usuarioOpt.isEmpty()) {
+                return "redirect:/auth/login?error";
+            }
+
+            // Cargar servicios y profesionales
             List<ServicioEntity> servicios = servicioService.findAll();
             List<ProfesionalEntity> profesionales = profesionalService.findAll();
-            
-            if (cita.getServicio() != null) {
-                ServicioEntity servicioSeleccionado = servicioService.findById(cita.getServicio().getId())
-                    .orElse(null);
-                model.addAttribute("servicioSeleccionado", servicioSeleccionado);
-            }
+
+            // Crear nueva cita vacía
+            CitaEntity cita = new CitaEntity();
             
             model.addAttribute("cita", cita);
             model.addAttribute("servicios", servicios);
             model.addAttribute("profesionales", profesionales);
-            model.addAttribute("usuario", usuario);
-            model.addAttribute("error", "Error al agendar cita: " + e.getMessage());
+            model.addAttribute("usuario", usuarioOpt.get());
+
+            return "user/citas/formulario";
             
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al cargar el formulario: " + e.getMessage());
             return "user/citas/formulario";
         }
     }
 
-    // ✏️ MOSTRAR FORMULARIO PARA EDITAR CITA (MODIFICADO)
-    @GetMapping("/{id}/editar")
-    public String mostrarFormularioEditarCita(@PathVariable Long id, 
-                                             Authentication authentication, 
-                                             Model model) {
-        String email = authentication.getName();
-        UsuarioEntity usuario = usuarioService.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        CitaEntity cita = citaService.findById(id)
-            .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-        
-        // Verificar que la cita pertenece al usuario
-        if (!cita.getUsuario().getId().equals(usuario.getId())) {
-            throw new RuntimeException("No tienes permiso para editar esta cita");
+    // 📝 FORMULARIO PARA EDITAR CITA
+    @GetMapping("/editar/{id}")
+    public String editarCita(@PathVariable Long id, 
+                           Authentication authentication, 
+                           Model model) {
+        try {
+            String email = authentication.getName();
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
+            
+            if (usuarioOpt.isEmpty()) {
+                return "redirect:/auth/login?error";
+            }
+
+            UsuarioEntity usuario = usuarioOpt.get();
+            Optional<CitaEntity> citaOpt = citaService.findById(id);
+            
+            if (citaOpt.isEmpty()) {
+                model.addAttribute("error", "Cita no encontrada");
+                return "redirect:/user/citas/listar";
+            }
+
+            CitaEntity cita = citaOpt.get();
+
+            // Verificar que la cita pertenece al usuario
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                model.addAttribute("error", "No tienes permiso para editar esta cita");
+                return "redirect:/user/citas/listar";
+            }
+
+            // Cargar servicios y profesionales
+            List<ServicioEntity> servicios = servicioService.findAll();
+            List<ProfesionalEntity> profesionales = profesionalService.findAll();
+
+            model.addAttribute("cita", cita);
+            model.addAttribute("servicios", servicios);
+            model.addAttribute("profesionales", profesionales);
+            model.addAttribute("usuario", usuario);
+
+            return "user/citas/formulario";
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al cargar la cita: " + e.getMessage());
+            return "redirect:/user/citas/listar";
         }
-        
-        List<ServicioEntity> servicios = servicioService.findAll();
-        List<ProfesionalEntity> profesionales = profesionalService.findAll();
-        
-        // Cargar servicio seleccionado para preview
-        if (cita.getServicio() != null) {
-            model.addAttribute("servicioSeleccionado", cita.getServicio());
-        }
-        
-        model.addAttribute("cita", cita);
-        model.addAttribute("servicios", servicios);
-        model.addAttribute("profesionales", profesionales);
-        model.addAttribute("usuario", usuario);
-        
-        return "user/citas/detalle";
     }
 
     // 👀 VER DETALLES DE UNA CITA
-    @GetMapping("/{id}")
-    public String verCita(@PathVariable Long id, Authentication authentication, Model model) {
-        String email = authentication.getName();
-        UsuarioEntity usuario = usuarioService.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        CitaEntity cita = citaService.findById(id)
-            .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-        
-        // Verificar que la cita pertenece al usuario
-        if (!cita.getUsuario().getId().equals(usuario.getId())) {
-            throw new RuntimeException("No tienes permiso para ver esta cita");
+    @GetMapping("/detalle/{id}")
+    public String verCita(@PathVariable Long id, 
+                        Authentication authentication, 
+                        Model model) {
+        try {
+            String email = authentication.getName();
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
+            
+            if (usuarioOpt.isEmpty()) {
+                return "redirect:/auth/login?error";
+            }
+
+            UsuarioEntity usuario = usuarioOpt.get();
+            Optional<CitaEntity> citaOpt = citaService.findById(id);
+            
+            if (citaOpt.isEmpty()) {
+                model.addAttribute("error", "Cita no encontrada");
+                return "redirect:/user/citas/listar";
+            }
+
+            CitaEntity cita = citaOpt.get();
+
+            // Verificar que la cita pertenece al usuario
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                model.addAttribute("error", "No tienes permiso para ver esta cita");
+                return "redirect:/user/citas/listar";
+            }
+
+            model.addAttribute("cita", cita);
+            model.addAttribute("usuario", usuario);
+            return "user/citas/detalle";
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al cargar los detalles: " + e.getMessage());
+            return "redirect:/user/citas/listar";
         }
-        
-        model.addAttribute("cita", cita);
-        return "user/citas/detalle";
+    }
+
+    // 💾 GUARDAR O ACTUALIZAR CITA
+    @PostMapping("/guardar")
+    public String guardarCita(@RequestParam(required = false) Long id,
+                            @RequestParam Long servicioId,
+                            @RequestParam Long profesionalId, 
+                            @RequestParam String fecha, 
+                            @RequestParam String hora,
+                            Authentication authentication,
+                            RedirectAttributes redirectAttributes) {
+
+        try {
+            String email = authentication.getName();
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
+            
+            if (usuarioOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/auth/login";
+            }
+
+            UsuarioEntity usuario = usuarioOpt.get();
+
+            // Validar parámetros requeridos
+            if (servicioId == null || profesionalId == null || fecha == null || hora == null) {
+                redirectAttributes.addFlashAttribute("error", "Todos los campos obligatorios deben ser completados");
+                return "redirect:/user/citas/nueva";
+            }
+
+            // Obtener servicio y profesional
+            Optional<ServicioEntity> servicioOpt = servicioService.findById(servicioId);
+            Optional<ProfesionalEntity> profesionalOpt = profesionalService.findById(profesionalId);
+            
+            if (servicioOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Servicio no encontrado");
+                return "redirect:/user/citas/nueva";
+            }
+            
+            if (profesionalOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Profesional no encontrado");
+                return "redirect:/user/citas/nueva";
+            }
+
+            ServicioEntity servicioEntity = servicioOpt.get();
+            ProfesionalEntity profesionalEntity = profesionalOpt.get();
+
+            // Combinar fecha y hora
+            LocalDate fechaDate = LocalDate.parse(fecha);
+            LocalTime horaTime = LocalTime.parse(hora);
+            LocalDateTime fechaHoraCompleta = LocalDateTime.of(fechaDate, horaTime);
+
+            CitaEntity cita;
+
+            if (id != null) {
+                // MODO EDICIÓN
+                Optional<CitaEntity> citaExistenteOpt = citaService.findById(id);
+                if (citaExistenteOpt.isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", "Cita no encontrada");
+                    return "redirect:/user/citas/listar";
+                }
+
+                cita = citaExistenteOpt.get();
+
+                // Verificar permisos
+                if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                    redirectAttributes.addFlashAttribute("error", "No tienes permiso para editar esta cita");
+                    return "redirect:/user/citas/listar";
+                }
+
+                // Actualizar cita existente
+                cita.setFechaHora(fechaHoraCompleta);
+                cita.setServicio(servicioEntity);
+                cita.setProfesional(profesionalEntity);
+
+                citaService.save(cita);
+                redirectAttributes.addFlashAttribute("success", "Cita actualizada exitosamente");
+                
+            } else {
+                // MODO NUEVA CITA
+                cita = new CitaEntity();
+                cita.setFechaHora(fechaHoraCompleta);
+                cita.setUsuario(usuario);
+                cita.setServicio(servicioEntity);
+                cita.setProfesional(profesionalEntity);
+                // El estado "PENDIENTE" se asigna automáticamente en el constructor
+
+                citaService.save(cita);
+                redirectAttributes.addFlashAttribute("success", "Cita agendada exitosamente");
+            }
+
+            return "redirect:/user/citas/listar";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al guardar la cita: " + e.getMessage());
+            return "redirect:/user/citas/nueva";
+        }
     }
 
     // ❌ CANCELAR CITA
-    @PostMapping("/{id}/cancelar")
+    @PostMapping("/cancelar/{id}")
     public String cancelarCita(@PathVariable Long id, 
+                             Authentication authentication,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            String email = authentication.getName();
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
+            
+            if (usuarioOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/auth/login";
+            }
+
+            UsuarioEntity usuario = usuarioOpt.get();
+            Optional<CitaEntity> citaOpt = citaService.findById(id);
+            
+            if (citaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Cita no encontrada");
+                return "redirect:/user/citas/listar";
+            }
+
+            CitaEntity cita = citaOpt.get();
+
+            // Verificar que la cita pertenece al usuario
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permiso para cancelar esta cita");
+                return "redirect:/user/citas/listar";
+            }
+
+            // Solo cancelar si está pendiente o confirmada
+            if ("PENDIENTE".equals(cita.getEstado()) || "CONFIRMADA".equals(cita.getEstado())) {
+                cita.setEstado("CANCELADA");
+                citaService.save(cita);
+                redirectAttributes.addFlashAttribute("success", "Cita cancelada exitosamente");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "No se puede cancelar una cita " + cita.getEstado());
+            }
+
+            return "redirect:/user/citas/listar";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar cita: " + e.getMessage());
+            return "redirect:/user/citas/listar";
+        }
+    }
+
+    // ✅ CONFIRMAR CITA (opcional - para el profesional)
+    @PostMapping("/confirmar/{id}")
+    public String confirmarCita(@PathVariable Long id,
                               Authentication authentication,
                               RedirectAttributes redirectAttributes) {
         try {
+            // Solo para profesionales/admin
             String email = authentication.getName();
-            UsuarioEntity usuario = usuarioService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            Optional<UsuarioEntity> usuarioOpt = usuarioService.findByEmail(email);
             
-            CitaEntity cita = citaService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
-            
-            // Verificar que la cita pertenece al usuario
-            if (!cita.getUsuario().getId().equals(usuario.getId())) {
-                throw new RuntimeException("No tienes permiso para cancelar esta cita");
+            if (usuarioOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/auth/login";
             }
+
+            Optional<CitaEntity> citaOpt = citaService.findById(id);
+            if (citaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Cita no encontrada");
+                return "redirect:/user/citas/listar";
+            }
+
+            CitaEntity cita = citaOpt.get();
             
-            cita.setEstado("CANCELADA");
-            citaService.save(cita);
-            
-            redirectAttributes.addFlashAttribute("success", "Cita cancelada exitosamente");
-            return "redirect:/user/citas";
-            
+            if ("PENDIENTE".equals(cita.getEstado())) {
+                cita.setEstado("CONFIRMADA");
+                citaService.save(cita);
+                redirectAttributes.addFlashAttribute("success", "Cita confirmada exitosamente");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Solo se pueden confirmar citas pendientes");
+            }
+
+            return "redirect:/user/citas/listar";
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al cancelar cita: " + e.getMessage());
-            return "redirect:/user/citas";
+            redirectAttributes.addFlashAttribute("error", "Error al confirmar cita: " + e.getMessage());
+            return "redirect:/user/citas/listar";
         }
     }
 }
