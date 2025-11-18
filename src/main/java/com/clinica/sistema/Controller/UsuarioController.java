@@ -87,21 +87,13 @@ public class UsuarioController {
         }
     }
 
- // 📅 MIS CITAS - LISTAR (CON DEBUGGING COMPLETO)
+    // 📅 MIS CITAS - LISTAR (CON DEBUGGING COMPLETO)
     @GetMapping("/citas")
     public String listarCitas(Authentication authentication, Model model) {
         try {
             System.out.println("🎯 LISTANDO CITAS DEL USUARIO - DEBUGGING COMPLETO");
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
             System.out.println("👤 Usuario ID: " + usuario.getId() + ", Email: " + usuario.getEmail());
-            
-            // ✅ MÉTODO 1: Usar el repositorio directamente
-            List<CitaEntity> citasJPQL = citaService.findByUsuarioId(usuario.getId());
-            System.out.println("📊 CITAS ENCONTRADAS CON JPQL: " + citasJPQL.size());
-            
-            // ✅ MÉTODO 2: Usar consulta nativa
-            List<CitaEntity> citasNative = citaService.findByUsuarioIdNative(usuario.getId());
-            System.out.println("📊 CITAS ENCONTRADAS CON NATIVE: " + citasNative.size());
             
             // ✅ MÉTODO 3: Obtener todas y filtrar manualmente (MÁS CONFIABLE)
             List<CitaEntity> todasLasCitas = citaService.findAll();
@@ -141,7 +133,7 @@ public class UsuarioController {
         }
     }
 
-    // 📅 AGENDAR CITA - FORMULARIO
+    // 📅 AGENDAR CITA - FORMULARIO (NUEVA CITA)
     @GetMapping("/citas/nueva")
     public String nuevaCitaForm(Authentication authentication, Model model, HttpServletRequest request) {
         try {
@@ -165,53 +157,62 @@ public class UsuarioController {
         }
     }
 
-    // 📅 AGENDAR CITA - GUARDAR (VERSIÓN MEJORADA)
+    // 📅 EDITAR CITA - FORMULARIO (CITA EXISTENTE)
+    @GetMapping("/citas/editar/{id}")
+    public String editarCitaForm(@PathVariable Long id, Authentication authentication, Model model) {
+        try {
+            System.out.println("🎯 FORMULARIO EDITAR CITA: " + id);
+            UsuarioEntity usuario = getUsuarioFromAuth(authentication);
+            
+            // ✅ OBTENER CITA EXISTENTE
+            CitaEntity cita = citaService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+            
+            // Verificar que la cita pertenece al usuario
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+                throw new RuntimeException("No tienes permiso para editar esta cita");
+            }
+            
+            List<ProfesionalEntity> profesionales = profesionalService.findAll();
+            List<ServicioEntity> servicios = servicioService.findAll();
+            
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("profesionales", profesionales);
+            model.addAttribute("servicios", servicios);
+            model.addAttribute("cita", cita); // ← Cita existente para editar
+            
+            System.out.println("✅ FORMULARIO EDICIÓN CARGADO - Cita ID: " + cita.getId());
+            return "user/citas/formulario";
+            
+        } catch (Exception e) {
+            System.out.println("❌ ERROR EN FORMULARIO EDICIÓN: " + e.getMessage());
+            return "redirect:/usuario/citas";
+        }
+    }
+
+    // 📅 AGENDAR CITA - GUARDAR (SOLO PARA NUEVAS CITAS)
     @PostMapping("/citas/nueva")
-    public String guardarCita(@ModelAttribute CitaEntity cita,
-                            @RequestParam Long profesionalId,
+    public String guardarCita(@RequestParam Long profesionalId,
                             @RequestParam Long servicioId,
                             @RequestParam String fecha,
                             @RequestParam String hora,
                             Authentication authentication,
                             RedirectAttributes redirectAttributes) {
         try {
-            System.out.println("💾 GUARDANDO NUEVA CITA - INICIO");
-            System.out.println("📅 Fecha recibida: " + fecha);
-            System.out.println("⏰ Hora recibida: " + hora);
-            System.out.println("👨‍⚕️ Profesional ID: " + profesionalId);
-            System.out.println("🏥 Servicio ID: " + servicioId);
-            
+            System.out.println("💾 CREANDO NUEVA CITA");
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
-            System.out.println("👤 Usuario autenticado: " + usuario.getId() + " - " + usuario.getNombre());
             
-            // ✅ VERIFICAR QUE EXISTEN LOS OBJETOS PRIMERO
+            // ✅ VERIFICAR QUE EXISTEN LOS OBJETOS
             ProfesionalEntity profesional = profesionalService.findById(profesionalId)
-                    .orElseThrow(() -> {
-                        System.out.println("❌ PROFESIONAL NO ENCONTRADO: " + profesionalId);
-                        return new RuntimeException("Profesional no encontrado con ID: " + profesionalId);
-                    });
+                    .orElseThrow(() -> new RuntimeException("Profesional no encontrado"));
             
             ServicioEntity servicio = servicioService.findById(servicioId)
-                    .orElseThrow(() -> {
-                        System.out.println("❌ SERVICIO NO ENCONTRADO: " + servicioId);
-                        return new RuntimeException("Servicio no encontrado con ID: " + servicioId);
-                    });
-            
-            System.out.println("✅ Profesional encontrado: " + profesional.getUsuario().getNombre());
-            System.out.println("✅ Servicio encontrado: " + servicio.getNombre());
+                    .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
             
             // ✅ COMBINAR FECHA Y HORA
-            LocalDateTime fechaHora;
-            try {
-                // Formato: "2025-01-20T14:00"
-                fechaHora = LocalDateTime.parse(fecha + "T" + hora);
-                System.out.println("✅ FechaHora combinada: " + fechaHora);
-            } catch (Exception e) {
-                System.out.println("❌ Error parseando fecha/hora: " + e.getMessage());
-                throw new RuntimeException("Formato de fecha/hora inválido: " + fecha + " " + hora);
-            }
+            LocalDateTime fechaHora = LocalDateTime.parse(fecha + "T" + hora);
             
-            // ✅ CREAR NUEVA CITA (no confiar en @ModelAttribute)
+            // ✅ CREAR NUEVA CITA
             CitaEntity nuevaCita = new CitaEntity();
             nuevaCita.setUsuario(usuario);
             nuevaCita.setProfesional(profesional);
@@ -219,21 +220,69 @@ public class UsuarioController {
             nuevaCita.setFechaHora(fechaHora);
             nuevaCita.setEstado("PENDIENTE");
             
-            // ✅ GUARDAR CON DEBUGGING
-            CitaEntity citaGuardada = citaService.saveWithDebug(nuevaCita);
+            // ✅ GUARDAR LA NUEVA CITA
+            CitaEntity citaGuardada = citaService.save(nuevaCita);
             
-            System.out.println("✅ CITA GUARDADA EXITOSAMENTE - ID: " + citaGuardada.getId());
             redirectAttributes.addFlashAttribute("success", 
-                "Cita agendada exitosamente para el " + fecha + " a las " + hora + " con " + profesional.getUsuario().getNombre());
-            
+                "Cita agendada exitosamente para el " + fecha + " a las " + hora);
             return "redirect:/usuario/citas";
             
         } catch (Exception e) {
-            System.out.println("❌ ERROR GUARDANDO CITA: " + e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", 
-                "Error al agendar cita: " + e.getMessage() + ". Por favor, intenta nuevamente.");
+            System.out.println("❌ ERROR CREANDO CITA: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al agendar cita: " + e.getMessage());
             return "redirect:/usuario/citas/nueva";
+        }
+    }
+
+    // 📅 ACTUALIZAR CITA - GUARDAR (PARA CITAS EXISTENTES)
+    @PostMapping("/citas/actualizar/{id}")
+    public String actualizarCita(@PathVariable Long id,
+                               @RequestParam Long profesionalId,
+                               @RequestParam Long servicioId,
+                               @RequestParam String fecha,
+                               @RequestParam String hora,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("💾 ACTUALIZANDO CITA: " + id);
+            UsuarioEntity usuario = getUsuarioFromAuth(authentication);
+            
+            // ✅ OBTENER CITA EXISTENTE
+            CitaEntity citaExistente = citaService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+            
+            // Verificar que la cita pertenece al usuario
+            if (!citaExistente.getUsuario().getId().equals(usuario.getId())) {
+                throw new RuntimeException("No tienes permiso para editar esta cita");
+            }
+            
+            // ✅ VERIFICAR NUEVOS OBJETOS
+            ProfesionalEntity profesional = profesionalService.findById(profesionalId)
+                    .orElseThrow(() -> new RuntimeException("Profesional no encontrado"));
+            
+            ServicioEntity servicio = servicioService.findById(servicioId)
+                    .orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+            
+            // ✅ COMBINAR FECHA Y HORA
+            LocalDateTime fechaHora = LocalDateTime.parse(fecha + "T" + hora);
+            
+            // ✅ ACTUALIZAR CITA EXISTENTE (NO crear nueva)
+            citaExistente.setProfesional(profesional);
+            citaExistente.setServicio(servicio);
+            citaExistente.setFechaHora(fechaHora);
+            // El estado se mantiene igual
+            
+            // ✅ GUARDAR CITA ACTUALIZADA
+            CitaEntity citaActualizada = citaService.save(citaExistente);
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Cita actualizada exitosamente para el " + fecha + " a las " + hora);
+            return "redirect:/usuario/citas";
+            
+        } catch (Exception e) {
+            System.out.println("❌ ERROR ACTUALIZANDO CITA: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar cita: " + e.getMessage());
+            return "redirect:/usuario/citas/editar/" + id;
         }
     }
 

@@ -48,7 +48,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation CORREGIDA -->
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" th:href="@{/usuario/dashboard}">
@@ -80,6 +80,7 @@
                 <i class="fas fa-calendar-plus"></i>
             </div>
             <h2>
+                <!-- ✅ DETECTA SI ES NUEVA O EDICIÓN -->
                 <span th:if="${cita?.id == null}">Agendar Nueva Cita</span>
                 <span th:if="${cita?.id != null}">Editar Cita</span>
             </h2>
@@ -102,10 +103,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Formulario CORREGIDO -->
-        <form th:action="@{/usuario/citas/nueva}" method="post" class="needs-validation" novalidate>
-            <!-- CSRF CORREGIDO -->
-           
+        <!-- ✅ FORMULARIO DINÁMICO: Diferente action para crear vs editar -->
+        <form th:action="${cita?.id == null} ? 
+                          @{/usuario/citas/nueva} : 
+                          @{/usuario/citas/actualizar/{id}(id=${cita.id})}" 
+              method="post" class="needs-validation" novalidate>
+            
+            <!-- ✅ Campo oculto para ID de cita (solo en edición) -->
             <input type="hidden" th:if="${cita?.id != null}" name="id" th:value="${cita.id}" />
             
             <div class="form-card">
@@ -190,7 +194,7 @@
                 </div>
             </div>
 
-            <!-- BOTONES CORREGIDOS -->
+            <!-- BOTONES -->
             <div class="buttons-container">
                 <div class="d-flex justify-content-center flex-wrap gap-3">
                     <a th:href="@{/usuario/citas}" class="btn btn-secondary btn-custom">
@@ -198,6 +202,7 @@
                     </a>
                     <button type="submit" class="btn btn-success btn-custom">
                         <i class="fas fa-calendar-check me-2"></i>
+                        <!-- ✅ TEXTO DINÁMICO DEL BOTÓN -->
                         <span th:if="${cita?.id == null}">Agendar Cita</span>
                         <span th:if="${cita?.id != null}">Actualizar Cita</span>
                     </button>
