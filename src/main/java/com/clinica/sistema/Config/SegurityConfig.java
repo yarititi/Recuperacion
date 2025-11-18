@@ -43,7 +43,7 @@ public class SegurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/webjars/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll() // ✅ H2 Console
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                 
                 // ✅ Rutas de administrador
                 .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
@@ -74,7 +74,7 @@ public class SegurityConfig {
             .exceptionHandling(exception -> exception
                 .accessDeniedPage("/access-denied")
             )
-            // ✅ Configuración para H2 Console (si la estás usando)
+            // ✅ Configuración para H2 Console
             .headers(headers -> headers
                 .frameOptions(frame -> frame.disable())
             )

@@ -6,6 +6,7 @@
     <title>Mis Citas - Clínica Médica</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Tus estilos CSS existentes... */
         * {
             margin: 0;
             padding: 0;
@@ -106,32 +107,6 @@
             background: #0da271;
         }
         
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .btn-primary {
-            background: #2563eb;
-        }
-        
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
         .table-container {
             background: white;
             border-radius: 10px;
@@ -204,11 +179,6 @@
             color: #2563eb;
         }
         
-        .btn-edit {
-            background: #f0fdf4;
-            color: #16a34a;
-        }
-        
         .btn-cancel {
             background: #fef2f2;
             color: #dc2626;
@@ -225,51 +195,27 @@
             margin-bottom: 1rem;
             color: #cbd5e1;
         }
-
-        @media (max-width: 768px) {
-            body {
-                padding-top: 100px;
-            }
-            
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-            
-            .table-container {
-                overflow-x: auto;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-			<a class="navbar-brand" th:href="@{/user/dashboard}">
-			    <i class="fas fa-hospital"></i>
-			    Clínica Médica
-			</a>
+            <a class="navbar-brand" th:href="@{/usuario/dashboard}">
+                <i class="fas fa-hospital"></i>
+                Clínica Médica
+            </a>
             <ul class="navbar-nav">
-                <li><a class="nav-link" th:href="@{/user/dashboard}">
+                <li><a class="nav-link" th:href="@{/usuario/dashboard}">
                     <i class="fas fa-home"></i> Dashboard
                 </a></li>
-                <li><a class="nav-link" th:href="@{/user/citas/listar}" style="background: #374151;">
+                <li><a class="nav-link" th:href="@{/usuario/citas}" style="background: #374151;">
                     <i class="fas fa-calendar-alt"></i> Mis Citas
                 </a></li>
                 <li><span class="nav-link" style="color: #60a5fa;">
                     <i class="fas fa-user"></i>
-                    <span th:text="${usuario.nombre}">Usuario</span>
+                    <!-- ✅ CORREGIDO: Manejo seguro del usuario -->
+                    <span th:text="${usuario?.nombre ?: 'Usuario'}">Usuario</span>
                 </span></li>
                 <li>
                     <form th:action="@{/logout}" method="post" style="display: inline;">
@@ -295,7 +241,7 @@
                     Gestiona todas tus citas médicas programadas
                 </p>
             </div>
-            <a th:href="@{/user/citas/nueva}" class="btn btn-success">
+            <a th:href="@{/usuario/citas/nueva}" class="btn btn-success">
                 <i class="fas fa-plus"></i>
                 Nueva Cita
             </a>
@@ -325,48 +271,56 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:if="${citas.empty}">
+                    <tr th:if="${citas == null or citas.empty}">
                         <td colspan="5">
                             <div class="empty-state">
                                 <i class="fas fa-calendar-times"></i>
                                 <h3>No tienes citas programadas</h3>
                                 <p>Agenda tu primera cita médica para comenzar</p>
-                                <a th:href="@{/user/citas/nueva}" class="btn btn-success" style="margin-top: 1rem;">
+                                <a th:href="@{/usuario/citas/nueva}" class="btn btn-success" style="margin-top: 1rem;">
                                     <i class="fas fa-plus"></i> Agendar Primera Cita
                                 </a>
                             </div>
                         </td>
                     </tr>
                     
+                    <!-- ✅ CORREGIDO: Manejo seguro de objetos nulos -->
                     <tr th:each="cita : ${citas}">
-                        <td th:text="${cita.servicio.nombre}"></td>
-                        <td th:text="${cita.profesional.usuario.nombre} + ' - ' + ${cita.profesional.especialidad}"></td>
-                        <td th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${cita?.servicio?.nombre ?: 'No disponible'}"></td>
                         <td>
-                            <span th:if="${cita.estado == 'PENDIENTE'}" class="status-badge status-pending">
+                            <span th:if="${cita?.profesional != null}">
+                                <span th:text="${cita.profesional.usuario.nombre}"></span> - 
+                                <span th:text="${cita.profesional.especialidad}"></span>
+                            </span>
+                            <span th:if="${cita?.profesional == null}">No disponible</span>
+                        </td>
+                        <td th:text="${cita?.fechaHora != null ? #temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm') : 'No disponible'}"></td>
+                        <td>
+                            <span th:if="${cita?.estado == 'PENDIENTE'}" class="status-badge status-pending">
                                 <i class="fas fa-clock"></i> PENDIENTE
                             </span>
-                            <span th:if="${cita.estado == 'CONFIRMADA'}" class="status-badge status-confirmed">
+                            <span th:if="${cita?.estado == 'CONFIRMADA'}" class="status-badge status-confirmed">
                                 <i class="fas fa-check"></i> CONFIRMADA
                             </span>
-                            <span th:if="${cita.estado == 'CANCELADA'}" class="status-badge status-cancelled">
+                            <span th:if="${cita?.estado == 'CANCELADA'}" class="status-badge status-cancelled">
                                 <i class="fas fa-times"></i> CANCELADA
+                            </span>
+                            <span th:if="${cita?.estado == null}" class="status-badge" style="background: #e5e7eb; color: #6b7280;">
+                                <i class="fas fa-question"></i> DESCONOCIDO
                             </span>
                         </td>
                         <td>
                             <div class="action-buttons">
-								<a th:href="@{/user/citas/detalle/{id}(id=${cita.id})}" class="action-btn btn-view">
-								    <i class="fas fa-eye"></i> Ver
-								</a>
-								<a th:href="@{/user/citas/editar/{id}(id=${cita.id})}" class="action-btn btn-edit">
-								    <i class="fas fa-edit"></i> Editar
-								</a>
-								<form th:action="@{/user/citas/cancelar/{id}(id=${cita.id})}" method="post" style="display: inline;">
-								    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-								    <button type="submit" class="action-btn btn-cancel">
-								        <i class="fas fa-times"></i> Cancelar
-								    </button>
-								</form>
+                                <a th:href="@{/usuario/citas/{id}(id=${cita.id})}" class="action-btn btn-view">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <form th:action="@{/usuario/citas/{id}/cancelar(id=${cita.id})}" method="post" style="display: inline;">
+                                    <button type="submit" class="action-btn btn-cancel" 
+                                            th:if="${cita?.estado == 'PENDIENTE' or cita?.estado == 'CONFIRMADA'}"
+                                            onclick="return confirm('¿Estás seguro de que quieres cancelar esta cita?')">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -374,5 +328,19 @@
             </table>
         </div>
     </div>
+
+    <script>
+        // Confirmación para cancelar cita
+        document.addEventListener('DOMContentLoaded', function() {
+            const cancelButtons = document.querySelectorAll('.btn-cancel');
+            cancelButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (!confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

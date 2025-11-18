@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ public class UsuarioController {
         try {
             System.out.println("🎯 ACCEDIENDO AL DASHBOARD USUARIO");
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
-            List<CitaEntity> citas = citaService.findByUsuarioId(usuario.getId());
+            List<CitaEntity> citas = citaService.findByUsuarioIdManual(usuario.getId()); // Usar método manual
             
             // Estadísticas
             long totalCitas = citas.size();
@@ -86,21 +87,55 @@ public class UsuarioController {
         }
     }
 
-    // 📅 MIS CITAS - LISTAR
+ // 📅 MIS CITAS - LISTAR (CON DEBUGGING COMPLETO)
     @GetMapping("/citas")
     public String listarCitas(Authentication authentication, Model model) {
         try {
-            System.out.println("🎯 LISTANDO CITAS DEL USUARIO");
+            System.out.println("🎯 LISTANDO CITAS DEL USUARIO - DEBUGGING COMPLETO");
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
-            List<CitaEntity> citas = citaService.findByUsuarioId(usuario.getId());
+            System.out.println("👤 Usuario ID: " + usuario.getId() + ", Email: " + usuario.getEmail());
             
+            // ✅ MÉTODO 1: Usar el repositorio directamente
+            List<CitaEntity> citasJPQL = citaService.findByUsuarioId(usuario.getId());
+            System.out.println("📊 CITAS ENCONTRADAS CON JPQL: " + citasJPQL.size());
+            
+            // ✅ MÉTODO 2: Usar consulta nativa
+            List<CitaEntity> citasNative = citaService.findByUsuarioIdNative(usuario.getId());
+            System.out.println("📊 CITAS ENCONTRADAS CON NATIVE: " + citasNative.size());
+            
+            // ✅ MÉTODO 3: Obtener todas y filtrar manualmente (MÁS CONFIABLE)
+            List<CitaEntity> todasLasCitas = citaService.findAll();
+            System.out.println("📊 TOTAL CITAS EN BD: " + todasLasCitas.size());
+            
+            List<CitaEntity> citasManual = citaService.findByUsuarioIdManual(usuario.getId());
+            
+            // ✅ LOG DETALLADO DE TODAS LAS CITAS EN BD
+            System.out.println("--- TODAS LAS CITAS EN BD ---");
+            for (CitaEntity cita : todasLasCitas) {
+                System.out.println("📅 Cita ID: " + cita.getId() + 
+                                 ", Fecha: " + cita.getFechaHora() + 
+                                 ", Estado: " + cita.getEstado() +
+                                 ", Usuario ID: " + (cita.getUsuario() != null ? cita.getUsuario().getId() : "NULO") +
+                                 ", Usuario Nombre: " + (cita.getUsuario() != null ? cita.getUsuario().getNombre() : "NULO"));
+            }
+            System.out.println("--- FIN CITAS BD ---");
+            
+            // ✅ AÑADIR USUARIO AL MODELO (ESTO ES LO QUE FALTABA)
             model.addAttribute("usuario", usuario);
-            model.addAttribute("citas", citas);
-            System.out.println("✅ CITAS CARGADAS: " + citas.size() + " citas");
+            model.addAttribute("citas", citasManual); // ← Usar las citas manuales
+            
+            if (citasManual.isEmpty()) {
+                System.out.println("ℹ️ No se encontraron citas para el usuario " + usuario.getId());
+                model.addAttribute("info", "No tienes citas agendadas.");
+            } else {
+                System.out.println("✅ Se encontraron " + citasManual.size() + " citas para el usuario");
+            }
+            
             return "user/citas/listar";
             
         } catch (Exception e) {
             System.out.println("❌ ERROR LISTANDO CITAS: " + e.getMessage());
+            e.printStackTrace();
             model.addAttribute("error", "Error al cargar las citas: " + e.getMessage());
             return "user/citas/listar";
         }
@@ -108,7 +143,7 @@ public class UsuarioController {
 
     // 📅 AGENDAR CITA - FORMULARIO
     @GetMapping("/citas/nueva")
-    public String nuevaCitaForm(Authentication authentication, Model model) {
+    public String nuevaCitaForm(Authentication authentication, Model model, HttpServletRequest request) {
         try {
             System.out.println("🎯 FORMULARIO NUEVA CITA");
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
@@ -120,7 +155,7 @@ public class UsuarioController {
             model.addAttribute("servicios", servicios);
             model.addAttribute("cita", new CitaEntity());
             
-            System.out.println("✅ FORMULARIO CARGADO - " + profesionales.size() + " profesionales");
+            System.out.println("✅ FORMULARIO CARGADO - " + profesionales.size() + " profesionales, " + servicios.size() + " servicios");
             return "user/citas/formulario";
             
         } catch (Exception e) {
@@ -130,34 +165,75 @@ public class UsuarioController {
         }
     }
 
-    // 📅 AGENDAR CITA - GUARDAR
+    // 📅 AGENDAR CITA - GUARDAR (VERSIÓN MEJORADA)
     @PostMapping("/citas/nueva")
     public String guardarCita(@ModelAttribute CitaEntity cita,
                             @RequestParam Long profesionalId,
                             @RequestParam Long servicioId,
+                            @RequestParam String fecha,
+                            @RequestParam String hora,
                             Authentication authentication,
                             RedirectAttributes redirectAttributes) {
         try {
-            System.out.println("💾 GUARDANDO NUEVA CITA");
+            System.out.println("💾 GUARDANDO NUEVA CITA - INICIO");
+            System.out.println("📅 Fecha recibida: " + fecha);
+            System.out.println("⏰ Hora recibida: " + hora);
+            System.out.println("👨‍⚕️ Profesional ID: " + profesionalId);
+            System.out.println("🏥 Servicio ID: " + servicioId);
+            
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
+            System.out.println("👤 Usuario autenticado: " + usuario.getId() + " - " + usuario.getNombre());
             
-            cita.setUsuario(usuario);
-            cita.setProfesional(profesionalService.findById(profesionalId)
-                    .orElseThrow(() -> new RuntimeException("Profesional no encontrado")));
-            cita.setServicio(servicioService.findById(servicioId)
-                    .orElseThrow(() -> new RuntimeException("Servicio no encontrado")));
-            cita.setEstado("PENDIENTE");
+            // ✅ VERIFICAR QUE EXISTEN LOS OBJETOS PRIMERO
+            ProfesionalEntity profesional = profesionalService.findById(profesionalId)
+                    .orElseThrow(() -> {
+                        System.out.println("❌ PROFESIONAL NO ENCONTRADO: " + profesionalId);
+                        return new RuntimeException("Profesional no encontrado con ID: " + profesionalId);
+                    });
             
-            citaService.save(cita);
+            ServicioEntity servicio = servicioService.findById(servicioId)
+                    .orElseThrow(() -> {
+                        System.out.println("❌ SERVICIO NO ENCONTRADO: " + servicioId);
+                        return new RuntimeException("Servicio no encontrado con ID: " + servicioId);
+                    });
             
-            redirectAttributes.addFlashAttribute("success", "Cita agendada exitosamente");
-            System.out.println("✅ CITA GUARDADA: " + cita.getId());
+            System.out.println("✅ Profesional encontrado: " + profesional.getUsuario().getNombre());
+            System.out.println("✅ Servicio encontrado: " + servicio.getNombre());
+            
+            // ✅ COMBINAR FECHA Y HORA
+            LocalDateTime fechaHora;
+            try {
+                // Formato: "2025-01-20T14:00"
+                fechaHora = LocalDateTime.parse(fecha + "T" + hora);
+                System.out.println("✅ FechaHora combinada: " + fechaHora);
+            } catch (Exception e) {
+                System.out.println("❌ Error parseando fecha/hora: " + e.getMessage());
+                throw new RuntimeException("Formato de fecha/hora inválido: " + fecha + " " + hora);
+            }
+            
+            // ✅ CREAR NUEVA CITA (no confiar en @ModelAttribute)
+            CitaEntity nuevaCita = new CitaEntity();
+            nuevaCita.setUsuario(usuario);
+            nuevaCita.setProfesional(profesional);
+            nuevaCita.setServicio(servicio);
+            nuevaCita.setFechaHora(fechaHora);
+            nuevaCita.setEstado("PENDIENTE");
+            
+            // ✅ GUARDAR CON DEBUGGING
+            CitaEntity citaGuardada = citaService.saveWithDebug(nuevaCita);
+            
+            System.out.println("✅ CITA GUARDADA EXITOSAMENTE - ID: " + citaGuardada.getId());
+            redirectAttributes.addFlashAttribute("success", 
+                "Cita agendada exitosamente para el " + fecha + " a las " + hora + " con " + profesional.getUsuario().getNombre());
+            
             return "redirect:/usuario/citas";
             
         } catch (Exception e) {
             System.out.println("❌ ERROR GUARDANDO CITA: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Error al agendar cita: " + e.getMessage());
-            return "redirect:/usuario/citas/formulario";
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", 
+                "Error al agendar cita: " + e.getMessage() + ". Por favor, intenta nuevamente.");
+            return "redirect:/usuario/citas/nueva";
         }
     }
 
@@ -201,10 +277,10 @@ public class UsuarioController {
             }
 
             cita.setEstado("CANCELADA");
-            citaService.save(cita);
+            CitaEntity citaActualizada = citaService.save(cita);
             
             redirectAttributes.addFlashAttribute("success", "Cita cancelada exitosamente");
-            System.out.println("✅ CITA CANCELADA");
+            System.out.println("✅ CITA CANCELADA - ID: " + citaActualizada.getId());
             return "redirect:/usuario/citas";
             
         } catch (Exception e) {
@@ -221,7 +297,7 @@ public class UsuarioController {
             System.out.println("🎯 VIENDO PERFIL USUARIO");
             UsuarioEntity usuario = getUsuarioFromAuth(authentication);
             
-            List<CitaEntity> citas = citaService.findByUsuarioId(usuario.getId());
+            List<CitaEntity> citas = citaService.findByUsuarioIdManual(usuario.getId());
             long totalCitas = citas.size();
             long citasPendientes = citas.stream()
                     .filter(c -> "PENDIENTE".equals(c.getEstado()))
@@ -273,10 +349,10 @@ public class UsuarioController {
             
             usuario.setNombre(nombre);
             usuario.setTelefono(telefono);
-            usuarioService.save(usuario);
+            UsuarioEntity usuarioActualizado = usuarioService.save(usuario);
             
             redirectAttributes.addFlashAttribute("success", "Perfil actualizado exitosamente");
-            System.out.println("✅ PERFIL ACTUALIZADO");
+            System.out.println("✅ PERFIL ACTUALIZADO - ID: " + usuarioActualizado.getId());
             return "redirect:/usuario/perfil";
             
         } catch (Exception e) {
